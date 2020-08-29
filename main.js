@@ -25,7 +25,6 @@ const get_repos = function(user, auth=null, callback=null, page=1, repos=[]) {
     const url = `https://api.github.com/users/${user}/repos?` + params.toString();
     xhttp.open('GET', url);
     xhttp.setRequestHeader('Accept', 'application/vnd.github.v3+json');
-    console.log(auth);
     if (auth !== null)
         xhttp.setRequestHeader('Authorization', auth);
     xhttp.send();
@@ -80,12 +79,20 @@ const get_run = function(user, repo, workflow_id, auth=null, callback=null) {
 // is maintained.
 const get_idx = function(repo) {
     const tbody = document.getElementById('tbody');
+    repo = repo.toLowerCase();
+    let lo = 0;
+    let hi = tbody.children.length;
     let idx = 0;
-    // TODO: use binary search.
-    for (const tr of tbody.children) {
-        const _repo = tr.getAttribute('data-repo');
-        if (_repo.toLowerCase() > repo.toLowerCase()) break;
-        ++idx;
+    while (hi > lo) {
+        let mid = lo + Math.floor((hi - lo) / 2);
+        let _repo = tbody.children[mid].getAttribute('data-repo').toLowerCase();
+        if (_repo < repo) {
+            idx = lo = mid + 1;
+        } else if (_repo > repo) {
+            idx = hi = mid;
+        } else {
+            idx = lo = mid + 1;
+        }
     }
     return idx;
 };
