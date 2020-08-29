@@ -84,7 +84,7 @@ const get_idx = function(repo) {
     let hi = tbody.children.length;
     let idx = 0;
     while (hi > lo) {
-        let mid = lo + Math.floor((hi - lo) / 2);
+        let mid = lo + ((hi - lo) >> 1);
         let _repo = tbody.children[mid].getAttribute('data-repo').toLowerCase();
         if (_repo < repo) {
             idx = lo = mid + 1;
