@@ -3,18 +3,20 @@
 // than the 'per_page' value specified.
 const PER_PAGE = 100;
 
-const get_repos = function(user, auth=null, callback=null, page=1, repos=[]) {
+const process_repos = function(user, auth=null, callback=null, page=1) {
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState === 4 && this.status === 200) {
             // The top level response is an array with items, unlike the other API calls that
             // return a dictionary with 'total_count' along with an array of items.
-            const _repos = JSON.parse(xhttp.responseText);
-            repos = repos.concat(_repos);
-            if (_repos.length < PER_PAGE) {
-                if (callback !== null) callback(repos);
-            } else {
-                get_repos(user, auth, callback, page + 1, repos);
+            const repos = JSON.parse(xhttp.responseText);
+            if (callback !== null) {
+                for (const repo of repos) {
+                    callback(repo);
+                }
+            }
+            if (repos.length === PER_PAGE) {
+                process_repos(user, auth, callback, page + 1);
             }
         }
     };
@@ -30,18 +32,21 @@ const get_repos = function(user, auth=null, callback=null, page=1, repos=[]) {
     xhttp.send();
 };
 
-const get_workflows = function(user, repo, auth=null, callback=null, page=1, workflows=[]) {
+const process_workflows = function(user, repo, auth=null, callback=null, page=1, count=0) {
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState === 4 && this.status === 200) {
             const response = JSON.parse(xhttp.responseText);
             const total_count = response.total_count;
-            const _workflows = response.workflows;
-            workflows = workflows.concat(_workflows);
-            if (_workflows.length < PER_PAGE || workflows.length >= total_count) {
-                if (callback !== null) callback(workflows);
-            } else {
-                get_workflows(user, repo, auth, callback, page + 1, workflows);
+            const workflows = response.workflows;
+            count += workflows.length;
+            if (callback !== null) {
+                for (const workflow of workflows) {
+                    callback(workflow);
+                }
+            }
+            if (count < total_count) {
+                process_workflows(user, repo, auth, callback, page + 1, count);
             }
         }
     };
@@ -57,7 +62,7 @@ const get_workflows = function(user, repo, auth=null, callback=null, page=1, wor
     xhttp.send();
 };
 
-const get_run = function(user, repo, workflow_id, auth=null, callback=null) {
+const process_run = function(user, repo, workflow_id, auth=null, callback=null) {
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState === 4 && this.status === 200) {
@@ -77,18 +82,20 @@ const get_run = function(user, repo, workflow_id, auth=null, callback=null) {
 
 // Returns the index in the table for inserting a new row, such that alphabetic ordering
 // is maintained.
-const get_idx = function(repo) {
+const get_idx = function(repo, workflow) {
     const tbody = document.getElementById('tbody');
-    repo = repo.toLowerCase();
+    const key = repo.toLowerCase() + ' ' + workflow.toLowerCase();
     let lo = 0;
     let hi = tbody.children.length;
     let idx = 0;
     while (hi > lo) {
         let mid = lo + ((hi - lo) >> 1);
         let _repo = tbody.children[mid].getAttribute('data-repo').toLowerCase();
-        if (_repo < repo) {
+        let _workflow = tbody.children[mid].getAttribute('data-workflow').toLowerCase();
+        let _key = _repo + ' ' + _workflow;
+        if (_key < key) {
             idx = lo = mid + 1;
-        } else if (_repo > repo) {
+        } else if (_key > key) {
             idx = hi = mid;
         } else {
             idx = lo = mid + 1;
@@ -99,78 +106,73 @@ const get_idx = function(repo) {
 
 const user = 'dstein64';
 const auth = null;
-get_repos(user, auth, (repos) => {
-    for (const repo of repos) {
-        const process_workflows = (workflows) => {
-            let idx = get_idx(repo.name);
-            for (const workflow of workflows) {
-                const tbody = document.getElementById('tbody');
-                const tr = document.createElement('tr');
-                tr.setAttribute('data-repo', repo.name);
-                tr.setAttribute('data-workflow', workflow.name);
-                if (idx === 0) {
-                    tbody.insertBefore(tr, tbody.firstElementChild);
-                } else {
-                    tbody.children[idx - 1].after(tr);
-                }
-                ++idx;
+process_repos(user, auth, (repo) => {
+    const workflow_callback = (workflow) => {
+        const tbody = document.getElementById('tbody');
+        const tr = document.createElement('tr');
+        tr.setAttribute('data-repo', repo.name);
+        tr.setAttribute('data-workflow', workflow.name);
+        let idx = get_idx(repo.name, workflow.name);
+        if (idx === 0) {
+            tbody.insertBefore(tr, tbody.firstElementChild);
+        } else {
+            tbody.children[idx - 1].after(tr);
+        }
 
-                const repo_td = document.createElement('td');
-                tr.appendChild(repo_td);
-                const repo_anchor = document.createElement('a');
-                repo_anchor.href = repo.html_url;
-                repo_anchor.textContent = repo.name;
-                repo_td.appendChild(repo_anchor);
+        const repo_td = document.createElement('td');
+        tr.appendChild(repo_td);
+        const repo_anchor = document.createElement('a');
+        repo_anchor.href = repo.html_url;
+        repo_anchor.textContent = repo.name;
+        repo_td.appendChild(repo_anchor);
 
-                const workflow_td = document.createElement('td');
-                tr.appendChild(workflow_td);
-                const workflow_anchor = document.createElement('a');
-                const workflow_qs = new URLSearchParams(
-                    {'query': 'workflow:"' + workflow.name + '"'}).toString();
-                workflow_anchor.href = `https://github.com/${user}/${repo.name}/actions?` + workflow_qs;
-                workflow_anchor.textContent = workflow.name;
-                workflow_td.appendChild(workflow_anchor);
+        const workflow_td = document.createElement('td');
+        tr.appendChild(workflow_td);
+        const workflow_anchor = document.createElement('a');
+        const workflow_qs = new URLSearchParams(
+            {'query': 'workflow:"' + workflow.name + '"'}).toString();
+        workflow_anchor.href = `https://github.com/${user}/${repo.name}/actions?` + workflow_qs;
+        workflow_anchor.textContent = workflow.name;
+        workflow_td.appendChild(workflow_anchor);
 
-                const badge_td = document.createElement('td');
-                tr.appendChild(badge_td);
-                const badge_img = document.createElement('img');
-                // Add a query string param, to prevent using a cached image.
-                badge_img.src = workflow.badge_url + '?_=' + String(new Date().getTime());
-                badge_td.appendChild(badge_img);
+        const badge_td = document.createElement('td');
+        tr.appendChild(badge_td);
+        const badge_img = document.createElement('img');
+        // Add a query string param, to prevent using a cached image.
+        badge_img.src = workflow.badge_url + '?_=' + String(new Date().getTime());
+        badge_td.appendChild(badge_img);
 
-                const process_run = (run) => {
-                    const run_td = document.createElement('td');
-                    tr.appendChild(run_td);
-                    const run_anchor = document.createElement('a');
-                    run_anchor.href = run.html_url;
-                    run_anchor.textContent = run.id;
-                    run_td.appendChild(run_anchor);
+        const run_callback = (run) => {
+            const run_td = document.createElement('td');
+            tr.appendChild(run_td);
+            const run_anchor = document.createElement('a');
+            run_anchor.href = run.html_url;
+            run_anchor.textContent = run.id;
+            run_td.appendChild(run_anchor);
 
-                    const status_td = document.createElement('td');
-                    tr.appendChild(status_td);
-                    // Observed statuses: 'queued', 'in_progress', 'completed'
-                    if (run.status !== null) {
-                        const status_span = document.createElement('span');
-                        status_span.classList.add(run.status);
-                        status_span.textContent = run.status;
-                        status_td.appendChild(status_span);
-                    }
+            const status_td = document.createElement('td');
+            tr.appendChild(status_td);
+            // Observed statuses: 'queued', 'in_progress', 'completed'
+            if (run.status !== null) {
+                const status_span = document.createElement('span');
+                status_span.classList.add(run.status);
+                status_span.textContent = run.status;
+                status_td.appendChild(status_span);
+            }
 
-                    const conclusion_td = document.createElement('td');
-                    tr.appendChild(conclusion_td);
-                    // Observed conclusions: 'success', 'failure', 'cancelled', null
-                    // 'canceled' was paired with 'completed' status.
-                    // null was paired with 'queued' and 'in_progress' statuses.
-                    if (run.conclusion !== null) {
-                        const conclusion_span = document.createElement('span');
-                        conclusion_span.classList.add(run.conclusion);
-                        conclusion_span.textContent = run.conclusion;
-                        conclusion_td.appendChild(conclusion_span);
-                    }
-                };
-                get_run(user, repo.name, workflow.id, auth, process_run);
+            const conclusion_td = document.createElement('td');
+            tr.appendChild(conclusion_td);
+            // Observed conclusions: 'success', 'failure', 'cancelled', null
+            // 'canceled' was paired with 'completed' status.
+            // null was paired with 'queued' and 'in_progress' statuses.
+            if (run.conclusion !== null) {
+                const conclusion_span = document.createElement('span');
+                conclusion_span.classList.add(run.conclusion);
+                conclusion_span.textContent = run.conclusion;
+                conclusion_td.appendChild(conclusion_span);
             }
         };
-        get_workflows(user, repo.name, auth, process_workflows);
-    }
+        process_run(user, repo.name, workflow.id, auth, run_callback);
+    };
+    process_workflows(user, repo.name, auth, workflow_callback);
 });
