@@ -1,0 +1,40 @@
+table > tbody > tr > td:nth-child(3) {
+    text-align: right;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 16px;
+}
+
+tbody > tr:nth-child(odd) {
+    background-color: #f2f2f2;
+}
+
+/*
+ * Observed statuses: 'queued', 'in_progress', 'completed'
+ * Observed conclusions: 'success', 'failure', 'cancelled', null
+ *
+ * 'completed' and 'success' are not colored. Nor is null since it's shown with the empty string.
+ */
+
+.queued {
+    color: violet;
+}
+
+.in_progress {
+    color: purple;
+}
+
+.failure {
+    color: red;
+}
+
+.cancelled {
+    color: orange;
+}
