@@ -76,16 +76,37 @@ const get_run = function(user, repo, workflow_id, auth=null, callback=null) {
     xhttp.send();
 };
 
+// Returns the index in the table for inserting a new row, such that alphabetic ordering
+// is maintained.
+const get_idx = function(repo) {
+    const tbody = document.getElementById('tbody');
+    let idx = 0;
+    // TODO: use binary search.
+    for (const tr of tbody.children) {
+        const _repo = tr.getAttribute('data-repo');
+        if (_repo.toLowerCase() > repo.toLowerCase()) break;
+        ++idx;
+    }
+    return idx;
+};
+
 const user = 'dstein64';
 const auth = null;
 get_repos(user, auth, (repos) => {
     for (const repo of repos) {
         const process_workflows = (workflows) => {
+            let idx = get_idx(repo.name);
             for (const workflow of workflows) {
                 const tbody = document.getElementById('tbody');
                 const tr = document.createElement('tr');
-                // TODO: this has to be added in the correct alphabetic position
-                tbody.appendChild(tr);
+                tr.setAttribute('data-repo', repo.name);
+                tr.setAttribute('data-workflow', workflow.name);
+                if (idx === 0) {
+                    tbody.insertBefore(tr, tbody.firstElementChild);
+                } else {
+                    tbody.children[idx - 1].after(tr);
+                }
+                ++idx;
 
                 const repo_td = document.createElement('td');
                 tr.appendChild(repo_td);
