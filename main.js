@@ -3,6 +3,83 @@
 // than the 'per_page' value specified.
 const PER_PAGE = 100;
 
+const DEFAULT_PRIORITY = 0;
+const RUN_PRIORITY = 3;
+const WORKFLOWS_PRIORITY = 2;
+const REPOS_PRIORITY = 1;
+
+const PriorityQueue = function() {
+    const array = [];
+    let count = 0;
+
+    // Compare priority values, breaking ties based on insertion order.
+    // Returns 1 if a > b, 0 if a == b, and -1 if a < b.
+    const compare = function(a, b) {
+        if (a.value > b.value)
+            return 1;
+        if (a.value < b.value)
+            return -1;
+        if (a.count < b.count)
+            return 1;
+        if (a.count > b.count)
+            return -1;
+        throw 'inputs had matching counts, which should be unique'
+    };
+
+    this.push = function(data, priority=DEFAULT_PRIORITY) {
+        // Reheapification upward
+        priority = {value: priority, count: count++};
+        let idx = array.length;
+        array.push({data: data, priority: priority});
+        while (idx > 0) {
+            const pidx = (idx - 1) >> 1;  // parent index
+            if (compare(priority, array[pidx].priority) > 0) {
+                const tmp = array[pidx];
+                array[pidx] = array[idx];
+                array[idx] = tmp;
+                idx = pidx;
+            } else {
+                break;
+            }
+        }
+    }
+
+    this.pop = function() {
+        // Reheapification downward
+        if (array.length === 0) {
+            throw 'queue is empty';
+        } else if (array.length === 1) {
+            return array.pop().data;
+        } else {
+            const popped = array[0].data;
+            array[0] = array.pop();
+            let idx = 0;
+            while (idx < array.length) {
+                const lidx = 2 * idx + 1;  // left child index
+                if (lidx >= array.length)
+                    break;
+                const ridx = lidx + 1;  // right child index
+                let cidx = lidx;  // candidate index for swapping
+                if (ridx < array.length && compare(array[ridx].priority, array[lidx].priority) > 0)
+                    cidx = ridx;
+                if (compare(array[cidx].priority, array[idx].priority) > 0) {
+                    const tmp = array[cidx];
+                    array[cidx] = array[idx];
+                    array[idx] = tmp;
+                    idx = cidx;
+                } else {
+                    break;
+                }
+            }
+            return popped;
+        }
+    }
+
+    this.length = function() {
+        return array.length;
+    }
+}
+
 // An API agent is used as a way to throttle API calls, with the goal of preventing/reducing:
 //   > 403: You have triggered an abuse detection mechanism.
 //     Please wait a few minutes before you try again.
@@ -10,13 +87,13 @@ const PER_PAGE = 100;
 const ApiAgent = function(auth=null) {
     const API = 'https://api.github.com'
 
-    const request_limit = 2;
+    const REQUEST_LIMIT = 1;
     let num_requests = 0;
-    const pending = [];
+    const pending = new PriorityQueue();
 
     const request = function(endpoint, callback=null) {
         if (!endpoint.startsWith('/')) {
-            throw `invalid endpoint: ${endpoint}`
+            throw `invalid endpoint: ${endpoint}`;
         }
         document.getElementById('progress').style.display = 'inline';
         num_requests += 1;
@@ -28,12 +105,12 @@ const ApiAgent = function(auth=null) {
                     const response = JSON.parse(xhttp.responseText);
                     callback(response);
                 }
-                if (pending.length > 0) {
-                    if (num_requests < request_limit) {
+                if (pending.length() > 0) {
+                    if (num_requests < REQUEST_LIMIT) {
                         const {endpoint, callback} = pending.pop();
                         request(endpoint, callback);
                     }
-                } else if (pending.length === 0) {
+                } else if (pending.length() === 0) {
                     // This can occur multiple times
                     document.getElementById('progress').style.display = 'none';
                 }
@@ -47,11 +124,11 @@ const ApiAgent = function(auth=null) {
         xhttp.send();
     };
 
-    this.submit = function(endpoint, callback=null) {
-        if (num_requests < request_limit) {
-            request(endpoint, callback);
-        } else {
-            pending.push({endpoint: endpoint, callback: callback});
+    this.submit = function(endpoint, callback=null, priority=DEFAULT_PRIORITY) {
+        pending.push({endpoint: endpoint, callback: callback}, priority);
+        if (num_requests < REQUEST_LIMIT) {
+            const popped = pending.pop();
+            request(popped.endpoint, popped.callback);
         }
     }
 };
@@ -76,7 +153,7 @@ const process_repos = function(user, callback=null, page=1) {
         per_page: PER_PAGE,
     });
     const endpoint = `/users/${user}/repos?` + params.toString();
-    API_AGENT.submit(endpoint, request_callback);
+    API_AGENT.submit(endpoint, request_callback, REPOS_PRIORITY);
 };
 
 const process_workflows = function(user, repo, callback=null, page=1, count=0) {
@@ -98,7 +175,7 @@ const process_workflows = function(user, repo, callback=null, page=1, count=0) {
         per_page: PER_PAGE,
     });
     const endpoint = `/repos/${user}/${repo}/actions/workflows?` + params.toString();
-    API_AGENT.submit(endpoint, request_callback);
+    API_AGENT.submit(endpoint, request_callback, WORKFLOWS_PRIORITY);
 };
 
 const process_run = function(user, repo, workflow_id, branch=null, callback=null) {
@@ -114,7 +191,7 @@ const process_run = function(user, repo, workflow_id, branch=null, callback=null
         params.append('branch', branch);
     }
     const endpoint = `/repos/${user}/${repo}/actions/workflows/${workflow_id}/runs?` + params.toString();
-    API_AGENT.submit(endpoint, request_callback);
+    API_AGENT.submit(endpoint, request_callback, RUN_PRIORITY);
 };
 
 // Returns the index in the table for inserting a new row, such that alphabetic ordering
