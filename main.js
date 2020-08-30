@@ -108,6 +108,19 @@ const ApiAgent = function(auth=null) {
                     const response = JSON.parse(this.responseText);
                     callback(response);
                 } else if (active && this.status === 403) {
+                    // Observed example 1:
+                    //   {
+                    //      "message": "API rate limit exceeded for 67.163.151.50. (But here's the good
+                    //         news: Authenticated requests get a higher rate limit. Check out the documentation
+                    //         for more details.)",
+                    //      "documentation_url": "https://developer.github.com/v3/#rate-limiting"
+                    //   }
+                    // Observed example 2:
+                    //   {
+                    //      "message": "You have triggered an abuse detection mechanism. Please wait a few
+                    //         minutes before you try again.",
+                    //      "documentation_url": "https://developer.github.com/v3/#abuse-rate-limits"
+                    //   }
                     active = false;
                     console.error(this.status + '\n' + this.responseText);
                     const response = JSON.parse(this.responseText);
