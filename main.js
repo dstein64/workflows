@@ -8,7 +8,7 @@ const RUN_PRIORITY = 3;
 const WORKFLOWS_PRIORITY = 2;
 const REPOS_PRIORITY = 1;
 
-const EM_DASH_CHAR = '\u2014'
+const EM_DASH_CHAR = '\u2014';
 
 const PriorityQueue = function() {
     const array = [];
@@ -44,7 +44,7 @@ const PriorityQueue = function() {
                 break;
             }
         }
-    }
+    };
 
     this.pop = function() {
         // Reheapification downward
@@ -75,19 +75,19 @@ const PriorityQueue = function() {
             }
             return popped;
         }
-    }
+    };
 
     this.length = function() {
         return array.length;
     }
-}
+};
 
 // An API agent is used as a way to throttle API calls, with the goal of preventing/reducing:
 //   > 403: You have triggered an abuse detection mechanism.
 //     Please wait a few minutes before you try again.
 //   > Chrome: net::ERR_INSUFFICIENT_RESOURCES
 const ApiAgent = function(auth=null) {
-    const API = 'https://api.github.com'
+    const API = 'https://api.github.com';
 
     const REQUEST_LIMIT = 1;
     let num_requests = 0;
@@ -142,7 +142,7 @@ const process_repos = function(user, callback=null, page=1) {
         // The top level response is an array with items, unlike the other API calls that
         // return a dictionary with 'total_count' along with an array of items.
         if (callback !== null) {
-            for (repo of repos) {
+            for (const repo of repos) {
                 callback(repo);
             }
         }
@@ -189,7 +189,7 @@ const process_run = function(user, repo, workflow_id, branch=null, callback=null
             }
             callback(run);
         }
-    }
+    };
     const params = new URLSearchParams({
         per_page: 1,
     });
