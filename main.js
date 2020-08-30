@@ -12,7 +12,7 @@ const EM_DASH_CHAR = '\u2014';
 
 const PriorityQueue = function() {
     const array = [];
-    let count = 0;
+    let count = 0;  // tracks the number of total pushes, not the current size
 
     // Compare priority values, breaking ties based on insertion order.
     // Returns 1 if a > b, 0 if a == b, and -1 if a < b.
@@ -30,7 +30,7 @@ const PriorityQueue = function() {
 
     this.push = function(data, priority=DEFAULT_PRIORITY) {
         // Reheapification upward
-        priority = {value: priority, count: count++};
+        priority = {value: priority, count: ++count};
         let idx = array.length;
         array.push({data: data, priority: priority});
         while (idx > 0) {
@@ -89,8 +89,8 @@ const PriorityQueue = function() {
 const ApiAgent = function(auth=null) {
     const API = 'https://api.github.com';
 
-    const REQUEST_LIMIT = 1;
-    let num_requests = 0;
+    const CONNECTIONS_LIMIT = 1;
+    let num_connections = 0;
     const pending = new PriorityQueue();
     let active = true;
 
@@ -99,11 +99,11 @@ const ApiAgent = function(auth=null) {
             throw `invalid endpoint: ${endpoint}`;
         }
         document.getElementById('progress').style.display = 'inline';
-        num_requests += 1;
+        num_connections += 1;
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (this.readyState === 4) {
-                num_requests -= 1;
+                num_connections -= 1;
                 if (this.status === 200 && callback != null) {
                     const response = JSON.parse(this.responseText);
                     callback(response);
@@ -128,7 +128,7 @@ const ApiAgent = function(auth=null) {
                     alert(message);
                 }
                 if (active && pending.length() > 0) {
-                    if (num_requests < REQUEST_LIMIT) {
+                    if (num_connections < CONNECTIONS_LIMIT) {
                         const {endpoint, callback} = pending.pop();
                         request(endpoint, callback);
                     }
@@ -148,7 +148,7 @@ const ApiAgent = function(auth=null) {
 
     this.submit = function(endpoint, callback=null, priority=DEFAULT_PRIORITY) {
         pending.push({endpoint: endpoint, callback: callback}, priority);
-        if (active && num_requests < REQUEST_LIMIT) {
+        if (active && num_connections < CONNECTIONS_LIMIT) {
             const popped = pending.pop();
             request(popped.endpoint, popped.callback);
         }
