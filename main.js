@@ -258,6 +258,7 @@ process_repos(user, (repo) => {
         workflow_td.appendChild(workflow_anchor);
 
         const badge_td = document.createElement('td');
+        badge_td.classList.add('badge');
         tr.appendChild(badge_td);
         const badge_img = document.createElement('img');
         // Add a query string param to prevent showing a cached image.

@@ -18,7 +18,7 @@
     display: none;
 }
 
-table > tbody > tr > td:nth-child(3) {
+table > tbody > tr > td.badge {
     text-align: right;
 }
 
@@ -36,7 +36,7 @@ tr td:first-child:before {
 table {
     border-collapse: collapse;
     border-spacing: 0;
-    border: 1px solid #ddd;
+    border: 1px solid gainsboro;
 }
 
 th, td {
@@ -44,7 +44,7 @@ th, td {
 }
 
 tbody > tr:nth-child(odd) {
-    background-color: #f2f2f2;
+    background-color: whitesmoke;
 }
 
 /*
