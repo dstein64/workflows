@@ -64,6 +64,7 @@ tbody > tr:nth-child(odd) {
 
 .failure {
     color: red;
+    font-weight: bold;
 }
 
 .cancelled {

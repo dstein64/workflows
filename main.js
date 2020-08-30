@@ -50,11 +50,11 @@ const PriorityQueue = function() {
         // Reheapification downward
         if (array.length === 0) {
             throw 'queue is empty';
-        } else if (array.length === 1) {
-            return array.pop().data;
-        } else {
-            const popped = array[0].data;
-            array[0] = array.pop();
+        }
+        const root = array[0].data;
+        const popped = array.pop();
+        if (array.length > 0) {
+            array[0] = popped;
             let idx = 0;
             while (idx < array.length) {
                 const lidx = 2 * idx + 1;  // left child index
@@ -73,13 +73,13 @@ const PriorityQueue = function() {
                     break;
                 }
             }
-            return popped;
         }
+        return root;
     };
 
     this.length = function() {
         return array.length;
-    }
+    };
 };
 
 // An API agent is used as a way to throttle API calls, with the goal of preventing/reducing:
@@ -132,7 +132,7 @@ const ApiAgent = function(auth=null) {
             const popped = pending.pop();
             request(popped.endpoint, popped.callback);
         }
-    }
+    };
 };
 
 const API_AGENT = new ApiAgent(null);
