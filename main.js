@@ -92,6 +92,7 @@ const ApiAgent = function(auth=null) {
     const REQUEST_LIMIT = 1;
     let num_requests = 0;
     const pending = new PriorityQueue();
+    let active = true;
 
     const request = function(endpoint, callback=null) {
         if (!endpoint.startsWith('/')) {
@@ -104,15 +105,21 @@ const ApiAgent = function(auth=null) {
             if (this.readyState === 4) {
                 num_requests -= 1;
                 if (this.status === 200 && callback != null) {
-                    const response = JSON.parse(xhttp.responseText);
+                    const response = JSON.parse(this.responseText);
                     callback(response);
+                } else if (active && this.status === 403) {
+                    active = false;
+                    console.error(this.status + '\n' + this.responseText);
+                    const response = JSON.parse(this.responseText);
+                    let message = `403 Error\n\n${response.message}\n\n${response.documentation_url}`;
+                    alert(message);
                 }
-                if (pending.length() > 0) {
+                if (active && pending.length() > 0) {
                     if (num_requests < REQUEST_LIMIT) {
                         const {endpoint, callback} = pending.pop();
                         request(endpoint, callback);
                     }
-                } else if (pending.length() === 0) {
+                } else {
                     // This can occur multiple times
                     document.getElementById('progress').style.display = 'none';
                 }
@@ -128,7 +135,7 @@ const ApiAgent = function(auth=null) {
 
     this.submit = function(endpoint, callback=null, priority=DEFAULT_PRIORITY) {
         pending.push({endpoint: endpoint, callback: callback}, priority);
-        if (num_requests < REQUEST_LIMIT) {
+        if (active && num_requests < REQUEST_LIMIT) {
             const popped = pending.pop();
             request(popped.endpoint, popped.callback);
         }
