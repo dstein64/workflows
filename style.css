@@ -51,7 +51,7 @@ tbody > tr:nth-child(odd) {
  * Observed statuses: 'queued', 'in_progress', 'completed'
  * Observed conclusions: 'success', 'failure', 'cancelled', null
  *
- * 'completed' and 'success' are not colored. Nor is null since it's shown with the empty string.
+ * 'completed' and 'success' are not colored. Nor is null since it's shown with a dash.
  */
 
 .queued {
