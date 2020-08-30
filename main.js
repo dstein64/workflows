@@ -8,6 +8,8 @@ const RUN_PRIORITY = 3;
 const WORKFLOWS_PRIORITY = 2;
 const REPOS_PRIORITY = 1;
 
+const EM_DASH_CHAR = '\u2014'
+
 const PriorityQueue = function() {
     const array = [];
     let count = 0;
@@ -180,8 +182,12 @@ const process_workflows = function(user, repo, callback=null, page=1, count=0) {
 
 const process_run = function(user, repo, workflow_id, branch=null, callback=null) {
     const request_callback = function(response) {
-        if (response.total_count > 0 && response.workflow_runs.length >= 1) {
-            if (callback !== null) callback(response.workflow_runs[0]);
+        if (callback !== null) {
+            let run = null;
+            if (response.total_count > 0 && response.workflow_runs.length >= 1) {
+                run = response.workflow_runs[0];
+            }
+            callback(run);
         }
     }
     const params = new URLSearchParams({
@@ -232,6 +238,9 @@ process_repos(user, (repo) => {
             tbody.children[idx - 1].after(tr);
         }
 
+        const row_idx_td = document.createElement('td');
+        tr.appendChild(row_idx_td);
+
         const repo_td = document.createElement('td');
         tr.appendChild(repo_td);
         const repo_anchor = document.createElement('a');
@@ -258,31 +267,39 @@ process_repos(user, (repo) => {
         const run_callback = (run) => {
             const run_td = document.createElement('td');
             tr.appendChild(run_td);
-            const run_anchor = document.createElement('a');
-            run_anchor.href = run.html_url;
-            run_anchor.textContent = run.id;
-            run_td.appendChild(run_anchor);
+            if (run !== null) {
+                const run_anchor = document.createElement('a');
+                run_anchor.href = run.html_url;
+                run_anchor.textContent = run.id;
+                run_td.appendChild(run_anchor);
+            } else {
+                run_td.textContent = EM_DASH_CHAR;
+            }
 
             const status_td = document.createElement('td');
             tr.appendChild(status_td);
-            // Observed statuses: 'queued', 'in_progress', 'completed'
-            if (run.status !== null) {
+            if (run !== null && run.status !== null) {
+                // Observed statuses: 'queued', 'in_progress', 'completed'
                 const status_span = document.createElement('span');
                 status_span.classList.add(run.status);
                 status_span.textContent = run.status;
                 status_td.appendChild(status_span);
+            } else {
+                status_td.textContent = EM_DASH_CHAR;
             }
 
             const conclusion_td = document.createElement('td');
             tr.appendChild(conclusion_td);
-            // Observed conclusions: 'success', 'failure', 'cancelled', null
-            // 'canceled' was paired with 'completed' status.
-            // null was paired with 'queued' and 'in_progress' statuses.
-            if (run.conclusion !== null) {
+            if (run !== null && run.conclusion !== null) {
+                // Observed conclusions: 'success', 'failure', 'cancelled', null
+                // 'canceled' was paired with 'completed' status.
+                // null was paired with 'queued' and 'in_progress' statuses.
                 const conclusion_span = document.createElement('span');
                 conclusion_span.classList.add(run.conclusion);
                 conclusion_span.textContent = run.conclusion;
                 conclusion_td.appendChild(conclusion_span);
+            } else {
+                conclusion_td.textContent = EM_DASH_CHAR;
             }
         };
         process_run(user, repo.name, workflow.id, repo.default_branch, run_callback);

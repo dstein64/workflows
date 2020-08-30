@@ -23,6 +23,17 @@ table > tbody > tr > td:nth-child(3) {
 }
 
 table {
+    counter-reset: row;
+}
+
+tr td:first-child:before {
+    display: table-cell;
+    counter-increment: row;
+    content: counter(row);
+    text-align: right;
+}
+
+table {
     border-collapse: collapse;
     border-spacing: 0;
     border: 1px solid #ddd;
