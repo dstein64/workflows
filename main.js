@@ -124,7 +124,9 @@ const ApiAgent = function(auth=null) {
                     active = false;
                     console.error(this.status + '\n' + this.responseText);
                     const response = JSON.parse(this.responseText);
-                    let message = `403 Error\n\n${response.message}\n\n${response.documentation_url}`;
+                    let message = '403 Error\n\n';
+                    message += 'Here\'s more information from GitHub:\n';
+                    message += `${response.message}\n${response.documentation_url}`;
                     alert(message);
                 }
                 if (active && pending.length() > 0) {
