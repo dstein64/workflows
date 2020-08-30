@@ -1,3 +1,23 @@
+#forkme {
+    position: fixed;
+    top: 0;
+    right: 0;
+    border: 0;
+    width: 149px;
+    height: 149px;
+}
+
+#progress {
+    width: 100%;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0;
+    display: none;
+}
+
 table > tbody > tr > td:nth-child(3) {
     text-align: right;
 }

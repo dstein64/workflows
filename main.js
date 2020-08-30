@@ -18,7 +18,7 @@ const ApiAgent = function(auth=null) {
         if (!endpoint.startsWith('/')) {
             throw `invalid endpoint: ${endpoint}`
         }
-        // TODO: turn on progress loading...
+        document.getElementById('progress').style.display = 'inline';
         num_requests += 1;
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
@@ -34,8 +34,8 @@ const ApiAgent = function(auth=null) {
                         request(endpoint, callback);
                     }
                 } else if (pending.length === 0) {
-                    // TODO: turn off progress loading...
-                    // THIS CAN FIRE MULTIPLE TIMES
+                    // This can occur multiple times
+                    document.getElementById('progress').style.display = 'none';
                 }
             }
         };
