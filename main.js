@@ -1,3 +1,21 @@
+// *************************************************
+// * Layout/Style
+// *************************************************
+
+// Position the forkme image offscreen when scrolling down. This lets it effectively
+// have fixed positioning horizontally (always rightmost aligned to window when visible,
+// including when scrolling right) and absolute positioning vertically (always at the top
+// of the page, even when scrolling down).
+window.addEventListener('scroll', function() {
+    const forkme = document.getElementById('forkme');
+    const offset = Math.min(forkme.offsetHeight, window.pageYOffset);
+    forkme.style.top = `-${offset}px`;
+});
+
+// *************************************************
+// * Main
+// *************************************************
+
 // Do not set PER_PAGE above 100. That's the max permitted value, and the code below
 // assumes there are no more items remaining if the total items returned is less
 // than the 'per_page' value specified.
