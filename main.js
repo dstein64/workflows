@@ -97,29 +97,16 @@ const PriorityQueue = function() {
 };
 
 // *************************************************
-// * Main
+// * API Agent
 // *************************************************
-
-// Do not set PER_PAGE above 100. That's the max permitted value, and the code below
-// assumes there are no more items remaining if the total items returned is less
-// than the 'per_page' value specified.
-const PER_PAGE = 100;
-
-const DEFAULT_PRIORITY = 0;
-const RUN_PRIORITY = 3;
-const WORKFLOWS_PRIORITY = 2;
-const REPOS_PRIORITY = 1;
-
-const EM_DASH_CHAR = '\u2014';
 
 // An API agent is used as a way to throttle API calls, with the goal of preventing/reducing:
 //   > 403: You have triggered an abuse detection mechanism.
 //     Please wait a few minutes before you try again.
 //   > Chrome: net::ERR_INSUFFICIENT_RESOURCES
-const ApiAgent = function(auth=null) {
+const ApiAgent = function(auth=null, connections_limit=1) {
     const API = 'https://api.github.com';
 
-    const CONNECTIONS_LIMIT = 1;
     let num_connections = 0;
     const pending = new PriorityQueue();
     let active = true;
@@ -166,7 +153,7 @@ const ApiAgent = function(auth=null) {
                     alert(message);
                 }
                 if (active && pending.length() > 0) {
-                    if (num_connections < CONNECTIONS_LIMIT) {
+                    if (num_connections < connections_limit) {
                         const {endpoint, callback} = pending.pop();
                         request(endpoint, callback);
                     }
@@ -186,14 +173,33 @@ const ApiAgent = function(auth=null) {
 
     this.submit = function(endpoint, callback=null, priority=DEFAULT_PRIORITY) {
         pending.push({endpoint: endpoint, callback: callback}, priority);
-        if (active && num_connections < CONNECTIONS_LIMIT) {
+        if (active && num_connections < connections_limit) {
             const popped = pending.pop();
             request(popped.endpoint, popped.callback);
         }
     };
 };
 
-const API_AGENT = new ApiAgent(null);
+// *************************************************
+// * Main
+// *************************************************
+
+// Do not set PER_PAGE above 100. That's the max permitted value, and the code below
+// assumes there are no more items remaining if the total items returned is less
+// than the 'per_page' value specified.
+const PER_PAGE = 100;
+
+const DEFAULT_PRIORITY = 0;
+const RUN_PRIORITY = 3;
+const WORKFLOWS_PRIORITY = 2;
+const REPOS_PRIORITY = 1;
+
+const EM_DASH_CHAR = '\u2014';
+
+const AUTH = null;
+const CONNECTIONS_LIMIT = 1;
+
+const API_AGENT = new ApiAgent(AUTH, CONNECTIONS_LIMIT);
 
 const process_repos = function(user, callback=null, page=1) {
     const request_callback = function(repos) {
