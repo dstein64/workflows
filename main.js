@@ -12,6 +12,14 @@ window.addEventListener('scroll', function() {
     forkme.style.top = `-${offset}px`;
 });
 
+const show_progress = function() {
+    document.getElementById('progress').style.display = 'inline';
+};
+
+const hide_progress = function() {
+    document.getElementById('progress').style.display = 'none';
+};
+
 // *************************************************
 // * Main
 // *************************************************
@@ -116,7 +124,7 @@ const ApiAgent = function(auth=null) {
         if (!endpoint.startsWith('/')) {
             throw `invalid endpoint: ${endpoint}`;
         }
-        document.getElementById('progress').style.display = 'inline';
+        show_progress();
         num_connections += 1;
         const xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
@@ -150,6 +158,7 @@ const ApiAgent = function(auth=null) {
                     let message = `${this.status} Error\n\n`;
                     message += 'Here\'s more information from GitHub:\n';
                     message += `${response.message}\n${response.documentation_url}`;
+                    hide_progress();
                     alert(message);
                 }
                 if (active && pending.length() > 0) {
@@ -159,7 +168,7 @@ const ApiAgent = function(auth=null) {
                     }
                 } else {
                     // This can occur multiple times
-                    document.getElementById('progress').style.display = 'none';
+                    hide_progress();
                 }
             }
         };
