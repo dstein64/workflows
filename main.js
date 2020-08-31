@@ -124,31 +124,41 @@ const ApiAgent = function(auth=null, connections_limit=1) {
                 if (this.status === 200 && callback != null) {
                     const response = JSON.parse(this.responseText);
                     callback(response);
-                } else if (active && [401, 403].includes(this.status)) {
-                    // 401 observed example
-                    //   {
-                    //      "message": "Bad credentials",
-                    //      "documentation_url": "https://docs.github.com/rest"
-                    //   }
-                    // 403 observed example
-                    //   {
-                    //      "message": "API rate limit exceeded for 67.163.151.50. (But here's the good
-                    //         news: Authenticated requests get a higher rate limit. Check out the documentation
-                    //         for more details.)",
-                    //      "documentation_url": "https://developer.github.com/v3/#rate-limiting"
-                    //   }
-                    // 403 observed example
-                    //   {
-                    //      "message": "You have triggered an abuse detection mechanism. Please wait a few
-                    //         minutes before you try again.",
-                    //      "documentation_url": "https://developer.github.com/v3/#abuse-rate-limits"
-                    //   }
+                } else if (active && this.status >= 400) {
                     active = false;
                     console.error(this.status + '\n' + this.responseText);
-                    const response = JSON.parse(this.responseText);
-                    let message = `${this.status} Error\n\n`;
-                    message += 'Here\'s more information from GitHub:\n';
-                    message += `${response.message}\n${response.documentation_url}`;
+                    let message = `${this.status} Error`;
+                    if ([401, 403, 404].includes(this.status)) {
+                        // 401 observed example
+                        //   {
+                        //      "message": "Bad credentials",
+                        //      "documentation_url": "https://docs.github.com/rest"
+                        //   }
+                        // 403 observed example
+                        //   {
+                        //      "message": "API rate limit exceeded for 67.163.151.50. (But here's the good
+                        //         news: Authenticated requests get a higher rate limit. Check out the documentation
+                        //         for more details.)",
+                        //      "documentation_url": "https://developer.github.com/v3/#rate-limiting"
+                        //   }
+                        // 403 observed example
+                        //   {
+                        //      "message": "You have triggered an abuse detection mechanism. Please wait a few
+                        //         minutes before you try again.",
+                        //      "documentation_url": "https://developer.github.com/v3/#abuse-rate-limits"
+                        //   }
+                        // 404 observed example
+                        //   {
+                        //      "message": "Not Found",
+                        //      "documentation_url":
+                        //        "https://docs.github.com/rest/reference/repos#list-repositories-for-a-user"
+                        //   }
+                        try {
+                            const response = JSON.parse(this.responseText);
+                            message += '\n\nHere\'s more information from GitHub:\n';
+                            message += `${response.message}\n${response.documentation_url}`;
+                        } catch {}
+                    }
                     hide_progress();
                     alert(message);
                 }
