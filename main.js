@@ -21,20 +21,8 @@ const hide_progress = function() {
 };
 
 // *************************************************
-// * Main
+// * Utils
 // *************************************************
-
-// Do not set PER_PAGE above 100. That's the max permitted value, and the code below
-// assumes there are no more items remaining if the total items returned is less
-// than the 'per_page' value specified.
-const PER_PAGE = 100;
-
-const DEFAULT_PRIORITY = 0;
-const RUN_PRIORITY = 3;
-const WORKFLOWS_PRIORITY = 2;
-const REPOS_PRIORITY = 1;
-
-const EM_DASH_CHAR = '\u2014';
 
 const PriorityQueue = function() {
     const array = [];
@@ -107,6 +95,22 @@ const PriorityQueue = function() {
         return array.length;
     };
 };
+
+// *************************************************
+// * Main
+// *************************************************
+
+// Do not set PER_PAGE above 100. That's the max permitted value, and the code below
+// assumes there are no more items remaining if the total items returned is less
+// than the 'per_page' value specified.
+const PER_PAGE = 100;
+
+const DEFAULT_PRIORITY = 0;
+const RUN_PRIORITY = 3;
+const WORKFLOWS_PRIORITY = 2;
+const REPOS_PRIORITY = 1;
+
+const EM_DASH_CHAR = '\u2014';
 
 // An API agent is used as a way to throttle API calls, with the goal of preventing/reducing:
 //   > 403: You have triggered an abuse detection mechanism.
