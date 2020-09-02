@@ -143,6 +143,12 @@ const ApiAgent = function(auth=null, connections_limit=1) {
                         //      "message": "Bad credentials",
                         //      "documentation_url": "https://docs.github.com/rest"
                         //   }
+                        // 401 observed example
+                        //   {
+                        //      "message": "Requires authentication",
+                        //      "documentation_url":
+                        //        "https://docs.github.com/rest/reference/users#get-the-authenticated-user"
+                        //   }
                         // 403 observed example
                         //   {
                         //      "message": "API rate limit exceeded for 67.163.151.50. (But here's the good
