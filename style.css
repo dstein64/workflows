@@ -86,6 +86,20 @@ a.tooltip span {
     display: none;
 }
 
+#username {
+    display: inline-block;
+}
+
+.label {
+    color: #586069;
+    border: 1px solid #e1e4e8;
+    border-radius: 7px;
+    padding: 1px 7px;
+    font-family: sans-serif;
+    font-size: 12px;
+    display: inline-block;
+}
+
 #results table > tbody {
     counter-reset: row;
 }

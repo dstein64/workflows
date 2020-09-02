@@ -26,7 +26,7 @@ const hide_progress = function() {
 
 const PriorityQueue = function() {
     const array = [];
-    let count = 0;  // tracks the number of total pushes, not the current size
+    let count = 0;  // reflects the number of total pushes, not the current size
 
     // Compare priority values, breaking ties based on insertion order.
     // Returns 1 if a > b, 0 if a == b, and -1 if a < b.
@@ -241,6 +241,7 @@ const WORKFLOWS_PRIORITY = 2;
 const REPOS_PRIORITY = 1;
 
 const EM_DASH_CHAR = '\u2014';
+const NBSP_CHAR = '\u00a0';
 
 const Controller = function(connections_limit, token=null) {
     let auth = null;
@@ -323,15 +324,29 @@ const Controller = function(connections_limit, token=null) {
         api_agent.submit(endpoint, request_callback, AUTHENTICATED_USER_PRIORITY);
     };
 
-    const init_results = (user) => {
+    const init_results = (user, authenticated=false) => {
         const results = document.getElementById('results');
         // Remove existing results
         while (results.lastChild) {
             results.removeChild(results.lastChild);
         }
-        const results_user = document.createElement('h3');
-        results_user.id = 'results_user';
-        results.appendChild(results_user);
+        const user_container = document.createElement('div');
+        results.appendChild(user_container);
+        const h3 = document.createElement('h3');
+        h3.id = 'username';
+        user_container.appendChild(h3);
+        const anchor = document.createElement('a');
+        h3.appendChild(anchor);
+        anchor.textContent = user;
+        anchor.href = `https://github.com/${user}`;
+
+        if (authenticated) {
+            user_container.appendChild(document.createTextNode(NBSP_CHAR));
+            const span = document.createElement('span');
+            user_container.appendChild(span);
+            span.classList.add('label');
+            span.textContent = 'Authenticated';
+        }
 
         const table = document.createElement('table');
         results.appendChild(table);
@@ -354,7 +369,7 @@ const Controller = function(connections_limit, token=null) {
         // New DOM elements are created to populate #results. This prevents prior submissions
         // from clobbering a new submission. This was done as a precaution, as the deactivation
         // of the API agent in this.deactivate should be sufficient to prevent this from happening.
-        const results = init_results(user);
+        const results = init_results(user, !_public);
         const tbody = results.querySelector('table tbody');
         process_repos(user, _public, (repo) => {
             const workflow_callback = (workflow) => {
@@ -379,6 +394,13 @@ const Controller = function(connections_limit, token=null) {
                 repo_anchor.href = repo.html_url;
                 repo_anchor.textContent = name;
                 repo_td.appendChild(repo_anchor);
+                if (repo.private) {
+                    repo_td.appendChild(document.createTextNode(NBSP_CHAR));
+                    const span = document.createElement('span');
+                    repo_td.appendChild(span);
+                    span.classList.add('label');
+                    span.textContent = 'Private';
+                }
 
                 const workflow_td = document.createElement('td');
                 tr.appendChild(workflow_td);
