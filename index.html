@@ -65,22 +65,26 @@
         </table>
         <br>
         <button id="submit_button">Submit</button>
+        <button id="cancel_button">Cancel</button>
     </fieldset>
 </form>
-<table id="results">
-    <thead>
-        <tr>
-            <th></th>
-            <th>repository</th>
-            <th>workflow</th>
-            <th>badge</th>
-            <th>run</th>
-            <th>status</th>
-            <th>conclusion</th>
-        </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-</table>
-<script src="main.js"></script>
+<div id="results">
+    <h3 id="results_user"></h3>
+    <table id="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>repository</th>
+                <th>workflow</th>
+                <th>badge</th>
+                <th>run</th>
+                <th>status</th>
+                <th>conclusion</th>
+            </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </table>
+    <script src="main.js"></script>
+</div>
 </body>
 </html>

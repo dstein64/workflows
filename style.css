@@ -82,33 +82,36 @@ a.tooltip span {
     display: none;
 }
 
-table#results {
+#results {
     display: none;
+}
+
+#table {
     counter-reset: row;
 }
 
-table#results > tbody > tr > td.badge {
+#table > tbody > tr > td.badge {
     text-align: right;
 }
 
-table#results tr td:first-child:before {
+#table tr td:first-child:before {
     display: table-cell;
     counter-increment: row;
     content: counter(row);
     text-align: right;
 }
 
-table#results {
+#table {
     border-collapse: collapse;
     border-spacing: 0;
     border: 1px solid gainsboro;
 }
 
-table#results th, table#results td {
+#table th, #table td {
     padding: 16px;
 }
 
-table#results tbody > tr:nth-child(odd) {
+#table tbody > tr:nth-child(odd) {
     background-color: whitesmoke;
 }
 
@@ -119,19 +122,19 @@ table#results tbody > tr:nth-child(odd) {
  * 'completed' and 'success' are not colored. Nor is null since it's shown with a dash.
  */
 
-table#results .queued {
+#table .queued {
     color: violet;
 }
 
-table#results .in_progress {
+#table .in_progress {
     color: purple;
 }
 
-table#results .failure {
+#table .failure {
     color: red;
     font-weight: bold;
 }
 
-table#results .cancelled {
+#table .cancelled {
     color: orange;
 }

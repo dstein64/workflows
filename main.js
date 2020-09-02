@@ -20,8 +20,8 @@ const hide_progress = function() {
     document.getElementById('progress').style.display = 'none';
 };
 
-const show_table = function() {
-    document.getElementById('results').style.display = 'table';
+const show_results = function() {
+    document.getElementById('results').style.display = 'block';
 };
 
 // *************************************************
@@ -115,7 +115,12 @@ const ApiAgent = function(auth=null, connections_limit=1) {
     const pending = new PriorityQueue();
     let active = true;
 
-    const request = function(endpoint, callback=null) {
+    const deactivate = () => {
+        active = false;
+        hide_progress();
+    };
+
+    const request = (endpoint, callback=null) => {
         if (!endpoint.startsWith('/')) {
             throw `invalid endpoint: ${endpoint}`;
         }
@@ -125,12 +130,11 @@ const ApiAgent = function(auth=null, connections_limit=1) {
         xhttp.onreadystatechange = function() {
             if (this.readyState === 4) {
                 num_connections -= 1;
-                if (this.status === 200 && callback != null) {
+                if (active && this.status === 200 && callback != null) {
                     const response = JSON.parse(this.responseText);
                     callback(response);
                 } else if (active && this.status >= 400) {
-                    active = false;
-                    hide_progress();
+                    deactivate();
                     console.error(this.status + '\n' + this.responseText);
                     let message = `${this.status} Error`;
                     if ([401, 403, 404].includes(this.status)) {
@@ -184,12 +188,16 @@ const ApiAgent = function(auth=null, connections_limit=1) {
         xhttp.send();
     };
 
-    this.submit = function(endpoint, callback=null, priority=DEFAULT_PRIORITY) {
+    this.submit = (endpoint, callback=null, priority=DEFAULT_PRIORITY) => {
         pending.push({endpoint: endpoint, callback: callback}, priority);
         if (active && num_connections < connections_limit) {
             const popped = pending.pop();
             request(popped.endpoint, popped.callback);
         }
+    };
+
+    this.deactivate = () => {
+        deactivate();
     };
 };
 
@@ -312,8 +320,8 @@ const Controller = function(connections_limit, token=null) {
         api_agent.submit(endpoint, request_callback, AUTHENTICATED_USER_PRIORITY);
     };
 
-    this.run = function(user=null) {
-        show_table();
+    this.run = (user=null) => {
+        show_results();
         // If no user is specified, get the username of the authenticated user, and call
         // this function recursively using that username.
         if (user === null) {
@@ -322,6 +330,7 @@ const Controller = function(connections_limit, token=null) {
             });
             return;
         }
+        document.getElementById('results_user').textContent = user;
         const tbody = document.getElementById('tbody');
         while (tbody.lastChild) {
             tbody.removeChild(tbody.lastChild);
@@ -408,21 +417,39 @@ const Controller = function(connections_limit, token=null) {
             process_workflows(user, repo.name, workflow_callback);
         });
     };
+
+    this.deactivate = () => {
+        // Deactivating the API agent is sufficient to deactivate the controller, since
+        // this will stop the registered callbacks from executing.
+        api_agent.deactivate();
+    };
 };
 
-document.getElementById('submit_button').onclick = function() {
-    let token = document.getElementById('token').value;
-    if (token.length === 0)
-        token = null;
-    const connections_limit = parseInt(document.getElementById('connections').value);
-    let user = document.getElementById('user').value;
-    if (user.length === 0)
-        user = null;
-    if (token === null && user === null) {
-        alert('A token or a user is required.');
+{
+    let controller = null;
+
+    document.getElementById('submit_button').onclick = function() {
+        if (controller !== null)
+            controller.deactivate();
+        let token = document.getElementById('token').value;
+        if (token.length === 0)
+            token = null;
+        const connections_limit = parseInt(document.getElementById('connections').value);
+        let user = document.getElementById('user').value;
+        if (user.length === 0)
+            user = null;
+        if (token === null && user === null) {
+            alert('A token or a user is required.');
+            return false;
+        }
+        controller = new Controller(connections_limit, token);
+        controller.run(user);
         return false;
-    }
-    const controller = new Controller(connections_limit, token);
-    controller.run(user);
-    return false;
-};
+    };
+
+    document.getElementById('cancel_button').onclick = function() {
+        if (controller !== null)
+            controller.deactivate();
+        return false;
+    };
+}
