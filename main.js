@@ -20,10 +20,6 @@ const hide_progress = function() {
     document.getElementById('progress').style.display = 'none';
 };
 
-const show_results = function() {
-    document.getElementById('results').style.display = 'block';
-};
-
 // *************************************************
 // * Utils
 // *************************************************
@@ -209,8 +205,7 @@ const ApiAgent = function(auth=null, connections_limit=1) {
 
 // Returns the index in the table for inserting a new row, such that alphabetic ordering
 // is maintained.
-const get_idx = function(repo, workflow) {
-    const tbody = document.getElementById('tbody');
+const get_idx = function(tbody, repo, workflow) {
     const key = repo.toLowerCase() + ' ' + workflow.toLowerCase();
     let lo = 0;
     let hi = tbody.children.length;
@@ -328,13 +323,39 @@ const Controller = function(connections_limit, token=null) {
         api_agent.submit(endpoint, request_callback, AUTHENTICATED_USER_PRIORITY);
     };
 
-    const run = (user=null, _public=true) => {
-        show_results();
-        document.getElementById('results_user').textContent = user;
-        const tbody = document.getElementById('tbody');
-        while (tbody.lastChild) {
-            tbody.removeChild(tbody.lastChild);
+    const init_results = (user) => {
+        const results = document.getElementById('results');
+        // Remove existing results
+        while (results.lastChild) {
+            results.removeChild(results.lastChild);
         }
+        const results_user = document.createElement('h3');
+        results_user.id = 'results_user';
+        results.appendChild(results_user);
+
+        const table = document.createElement('table');
+        results.appendChild(table);
+        const thead = document.createElement('thead');
+        table.appendChild(thead);
+        const tr = document.createElement('tr');
+        thead.appendChild(tr);
+        const columns = ['', 'repository', 'workflow', 'badge', 'run', 'status', 'conclusion'];
+        for (column of columns) {
+            const th = document.createElement('th');
+            th.textContent = column;
+            tr.appendChild(th);
+        }
+        const tbody = document.createElement('tbody');
+        table.appendChild(tbody);
+        return results;
+    };
+
+    const run = (user=null, _public=true) => {
+        // New DOM elements are created to populate #results. This prevents prior submissions
+        // from clobbering a new submission. This was done as a precaution, as the deactivation
+        // of the API agent in this.deactivate should be sufficient to prevent this from happening.
+        const results = init_results(user);
+        const tbody = results.querySelector('table tbody');
         process_repos(user, _public, (repo) => {
             const workflow_callback = (workflow) => {
                 const name = repo.owner.login === user ? repo.name : repo.full_name;
@@ -342,7 +363,7 @@ const Controller = function(connections_limit, token=null) {
                 const tr = document.createElement('tr');
                 tr.setAttribute('data-repo', name);
                 tr.setAttribute('data-workflow', workflow.name);
-                let idx = get_idx(name, workflow.name);
+                let idx = get_idx(tbody, name, workflow.name);
                 if (idx === 0) {
                     tbody.insertBefore(tr, tbody.firstElementChild);
                 } else {

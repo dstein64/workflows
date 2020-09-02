@@ -54,6 +54,10 @@ a.tooltip span {
     padding: 0;
 }
 
+#options_form input {
+    font-family: monospace;
+}
+
 /* *************************************************
  * * Miscellaneous
  * ************************************************* */
@@ -82,36 +86,32 @@ a.tooltip span {
     display: none;
 }
 
-#results {
-    display: none;
-}
-
-#table {
+#results table > tbody {
     counter-reset: row;
 }
 
-#table > tbody > tr > td.badge {
+#results table > tbody > tr > td.badge {
     text-align: right;
 }
 
-#table tr td:first-child:before {
+#results table > tbody tr td:first-child:before {
     display: table-cell;
     counter-increment: row;
     content: counter(row);
     text-align: right;
 }
 
-#table {
+#results table {
     border-collapse: collapse;
     border-spacing: 0;
     border: 1px solid gainsboro;
 }
 
-#table th, #table td {
+#results table th, #results table td {
     padding: 16px;
 }
 
-#table tbody > tr:nth-child(odd) {
+#results table tbody > tr:nth-child(odd) {
     background-color: whitesmoke;
 }
 
@@ -122,19 +122,19 @@ a.tooltip span {
  * 'completed' and 'success' are not colored. Nor is null since it's shown with a dash.
  */
 
-#table .queued {
+#results table .queued {
     color: violet;
 }
 
-#table .in_progress {
+#results table .in_progress {
     color: purple;
 }
 
-#table .failure {
+#results table .failure {
     color: red;
     font-weight: bold;
 }
 
-#table .cancelled {
+#results table .cancelled {
     color: orange;
 }

@@ -17,13 +17,13 @@
             <tr>
                 <td><label for="token">token</label></td>
                 <td>
-                    <input type="text" id="token" size="40">
+                    <input type="text" id="token" size="44">
                 </td>
             </tr>
             <tr>
                 <td><label for="user">user</label></td>
                 <td>
-                    <input type="text" id="user">
+                    <input type="text" id="user" size="24">
                 </td>
             </tr>
             <tr>
@@ -68,23 +68,7 @@
         <button id="cancel_button">Cancel</button>
     </fieldset>
 </form>
-<div id="results">
-    <h3 id="results_user"></h3>
-    <table id="table">
-        <thead>
-            <tr>
-                <th></th>
-                <th>repository</th>
-                <th>workflow</th>
-                <th>badge</th>
-                <th>run</th>
-                <th>status</th>
-                <th>conclusion</th>
-            </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-    </table>
-    <script src="main.js"></script>
-</div>
+<div id="results"></div>
+<script src="main.js"></script>
 </body>
 </html>
