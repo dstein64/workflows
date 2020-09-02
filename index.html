@@ -11,7 +11,65 @@
 </a>
 <progress id="progress"></progress>
 <h1>workflows</h1>
-<table>
+
+<form id="options_form">
+    <fieldset id="fieldset">
+        <table id="options_table">
+            <tr>
+                <td><label for="token">token</label></td>
+                <td>
+                    <input type="text" id="token" size="40">
+                </td>
+            </tr>
+            <tr>
+                <td><label for="user">user</label></td>
+                <td>
+                    <input type="text" id="user">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a class="tooltip">
+                        connections
+                        <span>
+                            The maximum number of concurrent connections for GitHub API calls.
+                        </span>
+                    </a>
+                </td>
+                <td>
+                    <select id="connections">
+                        <option selected="selected">1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                        <option>6</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a class="tooltip">
+                        run
+                        <span>
+                            The maximum number of concurrent connections for GitHub API calls.
+                        </span>
+                    </a>
+                </td>
+                <td>
+                    <select id="run_type">
+                        <option selected="selected" value="default_branch">default branch</option>
+                        <option value="latest_run">latest run</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+        <br>
+        <button id="submit_button">Submit</button>
+    </fieldset>
+</form>
+
+<table id="results">
     <thead>
         <tr>
             <th></th>
