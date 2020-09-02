@@ -247,7 +247,7 @@ const Controller = function(connections_limit, token=null) {
         auth = 'token ' + token;
     const api_agent = new ApiAgent(auth, connections_limit);
 
-    const process_repos = function(user, callback=null, page=1) {
+    const process_repos = function(user, public=true, callback=null, page=1) {
         const request_callback = function(repos) {
             // The top level response is an array with items, unlike the other API calls that
             // return a dictionary with 'total_count' along with an array of items.
@@ -257,18 +257,20 @@ const Controller = function(connections_limit, token=null) {
                 }
             }
             if (repos.length === PER_PAGE) {
-                process_repos(user, callback, page + 1);
+                process_repos(user, public, callback, page + 1);
             }
         };
         const params = new URLSearchParams({
             page: page,
             per_page: PER_PAGE,
         });
-        const endpoint = `/users/${user}/repos?` + params.toString();
+        let endpoint = `/users/${user}/repos?` + params.toString();
+        if (!public)
+            endpoint = `/user/repos?` + params.toString();
         api_agent.submit(endpoint, request_callback, REPOS_PRIORITY);
     };
 
-    const process_workflows = function(user, repo, callback=null, page=1, count=0) {
+    const process_workflows = function(repo, callback=null, page=1, count=0) {
         const request_callback = function(response) {
             const total_count = response.total_count;
             const workflows = response.workflows;
@@ -279,18 +281,18 @@ const Controller = function(connections_limit, token=null) {
                 }
             }
             if (count < total_count) {
-                process_workflows(user, repo, callback, page + 1, count);
+                process_workflows(repo, callback, page + 1, count);
             }
         };
         const params = new URLSearchParams({
             page: page,
             per_page: PER_PAGE,
         });
-        const endpoint = `/repos/${user}/${repo}/actions/workflows?` + params.toString();
+        const endpoint = `/repos/${repo}/actions/workflows?` + params.toString();
         api_agent.submit(endpoint, request_callback, WORKFLOWS_PRIORITY);
     };
 
-    const process_run = function(user, repo, workflow_id, branch=null, callback=null) {
+    const process_run = function(repo, workflow_id, branch=null, callback=null) {
         const request_callback = function(response) {
             if (callback !== null) {
                 let run = null;
@@ -306,7 +308,7 @@ const Controller = function(connections_limit, token=null) {
         if (branch !== null) {
             params.append('branch', branch);
         }
-        const endpoint = `/repos/${user}/${repo}/actions/workflows/${workflow_id}/runs?` + params.toString();
+        const endpoint = `/repos/${repo}/actions/workflows/${workflow_id}/runs?` + params.toString();
         api_agent.submit(endpoint, request_callback, RUN_PRIORITY);
     };
 
@@ -320,27 +322,21 @@ const Controller = function(connections_limit, token=null) {
         api_agent.submit(endpoint, request_callback, AUTHENTICATED_USER_PRIORITY);
     };
 
-    this.run = (user=null) => {
+    const run = (user=null, public=true) => {
         show_results();
-        // If no user is specified, get the username of the authenticated user, and call
-        // this function recursively using that username.
-        if (user === null) {
-            process_authenticated_user((user) => {
-                this.run(user.login);
-            });
-            return;
-        }
         document.getElementById('results_user').textContent = user;
         const tbody = document.getElementById('tbody');
         while (tbody.lastChild) {
             tbody.removeChild(tbody.lastChild);
         }
-        process_repos(user, (repo) => {
+        process_repos(user, public, (repo) => {
             const workflow_callback = (workflow) => {
+                const name = repo.owner.login === user ? repo.name : repo.full_name;
+
                 const tr = document.createElement('tr');
-                tr.setAttribute('data-repo', repo.name);
+                tr.setAttribute('data-repo', name);
                 tr.setAttribute('data-workflow', workflow.name);
-                let idx = get_idx(repo.name, workflow.name);
+                let idx = get_idx(name, workflow.name);
                 if (idx === 0) {
                     tbody.insertBefore(tr, tbody.firstElementChild);
                 } else {
@@ -354,7 +350,7 @@ const Controller = function(connections_limit, token=null) {
                 tr.appendChild(repo_td);
                 const repo_anchor = document.createElement('a');
                 repo_anchor.href = repo.html_url;
-                repo_anchor.textContent = repo.name;
+                repo_anchor.textContent = name;
                 repo_td.appendChild(repo_anchor);
 
                 const workflow_td = document.createElement('td');
@@ -362,7 +358,7 @@ const Controller = function(connections_limit, token=null) {
                 const workflow_anchor = document.createElement('a');
                 const workflow_qs = new URLSearchParams(
                     {'query': 'workflow:"' + workflow.name + '"'}).toString();
-                workflow_anchor.href = `https://github.com/${user}/${repo.name}/actions?` + workflow_qs;
+                workflow_anchor.href = `https://github.com/${repo.full_name}/actions?` + workflow_qs;
                 workflow_anchor.textContent = workflow.name;
                 workflow_td.appendChild(workflow_anchor);
 
@@ -412,10 +408,20 @@ const Controller = function(connections_limit, token=null) {
                         conclusion_td.textContent = EM_DASH_CHAR;
                     }
                 };
-                process_run(user, repo.name, workflow.id, repo.default_branch, run_callback);
+                process_run(repo.full_name, workflow.id, repo.default_branch, run_callback);
             };
-            process_workflows(user, repo.name, workflow_callback);
+            process_workflows(repo.full_name, workflow_callback);
         });
+    };
+
+    this.run = (user=null) => {
+        if (user === null) {
+            process_authenticated_user((user) => {
+                run(user.login, false);
+            });
+        } else {
+            run(user, true);
+        }
     };
 
     this.deactivate = () => {
