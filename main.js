@@ -253,7 +253,7 @@ const Controller = function(connections_limit, token=null) {
         auth = 'token ' + token;
     const api_agent = new ApiAgent(auth, connections_limit);
 
-    const process_repos = function(user, public=true, callback=null, page=1) {
+    const process_repos = function(user, _public=true, callback=null, page=1) {
         const request_callback = function(repos) {
             // The top level response is an array with items, unlike the other API calls that
             // return a dictionary with 'total_count' along with an array of items.
@@ -263,7 +263,7 @@ const Controller = function(connections_limit, token=null) {
                 }
             }
             if (repos.length === PER_PAGE) {
-                process_repos(user, public, callback, page + 1);
+                process_repos(user, _public, callback, page + 1);
             }
         };
         const params = new URLSearchParams({
@@ -271,7 +271,7 @@ const Controller = function(connections_limit, token=null) {
             per_page: PER_PAGE,
         });
         let endpoint = `/users/${user}/repos?` + params.toString();
-        if (!public)
+        if (!_public)
             endpoint = `/user/repos?` + params.toString();
         api_agent.submit(endpoint, request_callback, REPOS_PRIORITY);
     };
@@ -328,14 +328,14 @@ const Controller = function(connections_limit, token=null) {
         api_agent.submit(endpoint, request_callback, AUTHENTICATED_USER_PRIORITY);
     };
 
-    const run = (user=null, public=true) => {
+    const run = (user=null, _public=true) => {
         show_results();
         document.getElementById('results_user').textContent = user;
         const tbody = document.getElementById('tbody');
         while (tbody.lastChild) {
             tbody.removeChild(tbody.lastChild);
         }
-        process_repos(user, public, (repo) => {
+        process_repos(user, _public, (repo) => {
             const workflow_callback = (workflow) => {
                 const name = repo.owner.login === user ? repo.name : repo.full_name;
 
