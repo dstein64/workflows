@@ -20,6 +20,10 @@ const hide_progress = function() {
     document.getElementById('progress').style.display = 'none';
 };
 
+const show_table = function() {
+    document.getElementById('results').style.display = 'table';
+};
+
 // *************************************************
 // * Utils
 // *************************************************
@@ -126,6 +130,7 @@ const ApiAgent = function(auth=null, connections_limit=1) {
                     callback(response);
                 } else if (active && this.status >= 400) {
                     active = false;
+                    hide_progress();
                     console.error(this.status + '\n' + this.responseText);
                     let message = `${this.status} Error`;
                     if ([401, 403, 404].includes(this.status)) {
@@ -159,7 +164,6 @@ const ApiAgent = function(auth=null, connections_limit=1) {
                             message += `${response.message}\n${response.documentation_url}`;
                         } catch {}
                     }
-                    hide_progress();
                     alert(message);
                 }
                 if (active && pending.length() > 0) {
@@ -167,8 +171,7 @@ const ApiAgent = function(auth=null, connections_limit=1) {
                         const {endpoint, callback} = pending.pop();
                         request(endpoint, callback);
                     }
-                } else {
-                    // This can occur multiple times
+                } else if (num_connections === 0) {
                     hide_progress();
                 }
             }
@@ -223,6 +226,7 @@ const get_idx = function(repo, workflow) {
 // than the 'per_page' value specified.
 const PER_PAGE = 100;
 
+const AUTHENTICATED_USER_PRIORITY = 4;
 const RUN_PRIORITY = 3;
 const WORKFLOWS_PRIORITY = 2;
 const REPOS_PRIORITY = 1;
@@ -298,7 +302,26 @@ const Controller = function(connections_limit, token=null) {
         api_agent.submit(endpoint, request_callback, RUN_PRIORITY);
     };
 
-    this.run = function(user) {
+    const process_authenticated_user = function(callback=null) {
+        const request_callback = function(user) {
+            if (callback !== null) {
+                callback(user);
+            }
+        };
+        const endpoint = '/user';
+        api_agent.submit(endpoint, request_callback, AUTHENTICATED_USER_PRIORITY);
+    };
+
+    this.run = function(user=null) {
+        show_table();
+        // If no user is specified, get the username of the authenticated user, and call
+        // this function recursively using that username.
+        if (user === null) {
+            process_authenticated_user((user) => {
+                this.run(user.login);
+            });
+            return;
+        }
         const tbody = document.getElementById('tbody');
         while (tbody.lastChild) {
             tbody.removeChild(tbody.lastChild);
@@ -392,7 +415,13 @@ document.getElementById('submit_button').onclick = function() {
     if (token.length === 0)
         token = null;
     const connections_limit = parseInt(document.getElementById('connections').value);
-    const user = document.getElementById('user').value;
+    let user = document.getElementById('user').value;
+    if (user.length === 0)
+        user = null;
+    if (token === null && user === null) {
+        alert('A token or a user is required.');
+        return false;
+    }
     const controller = new Controller(connections_limit, token);
     controller.run(user);
     return false;

@@ -55,7 +55,7 @@ a.tooltip span {
 }
 
 /* *************************************************
- * * Results
+ * * Miscellaneous
  * ************************************************* */
 
 #forkme {
@@ -66,6 +66,10 @@ a.tooltip span {
     width: 149px;
     height: 149px;
 }
+
+/* *************************************************
+ * * Progress and Results
+ * ************************************************* */
 
 #progress {
     width: 100%;
@@ -78,12 +82,13 @@ a.tooltip span {
     display: none;
 }
 
-table#results > tbody > tr > td.badge {
-    text-align: right;
+table#results {
+    display: none;
+    counter-reset: row;
 }
 
-table#results {
-    counter-reset: row;
+table#results > tbody > tr > td.badge {
+    text-align: right;
 }
 
 table#results tr td:first-child:before {
