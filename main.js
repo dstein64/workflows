@@ -301,12 +301,9 @@ const Controller = function(connections_limit, token=null) {
         api_agent.submit(endpoint, request_callback, AUTHENTICATED_USER_PRIORITY);
     };
 
+    // This function assumes existing results have already been removed.
     const init_results = (user, authenticated=false) => {
         const results = document.getElementById('results');
-        // Remove existing results
-        while (results.lastChild) {
-            results.removeChild(results.lastChild);
-        }
         const user_container = document.createElement('div');
         results.appendChild(user_container);
         const h3 = document.createElement('h3');
@@ -472,6 +469,11 @@ const Controller = function(connections_limit, token=null) {
     };
 
     this.run = (user=null) => {
+        // Remove existing results
+        const results = document.getElementById('results');
+        while (results.lastChild) {
+            results.removeChild(results.lastChild);
+        }
         if (user === null) {
             process_authenticated_user((user) => {
                 run(user.login, false);
