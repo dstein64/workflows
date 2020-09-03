@@ -528,12 +528,11 @@ const Controller = function(connections_limit, token=null) {
             user = null;
         if (token === null && user === null) {
             alert('A token or a user is required.');
-            return false;
+            return;
         }
         const default_branch = document.getElementById('default_branch').checked;
         controller = new Controller(connections_limit, token);
         controller.process(user, default_branch);
-        return false;
     };
 
     document.getElementById('cancel_button').onclick = function() {
