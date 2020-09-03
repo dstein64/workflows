@@ -394,12 +394,20 @@ const Controller = function(connections_limit, token=null) {
                 repo_anchor.href = repo.html_url;
                 repo_anchor.textContent = name;
                 repo_td.appendChild(repo_anchor);
-                if (repo.private) {
+                let repo_label = null;
+                if (repo.private && repo.archived) {
+                    repo_label = 'Private archived';
+                } else if (repo.private) {
+                    repo_label = 'Private';
+                } else if (repo.archived) {
+                    repo_label = 'Archived';
+                }
+                if (repo_label !== null) {
                     repo_td.appendChild(document.createTextNode(NBSP_CHAR));
                     const span = document.createElement('span');
                     repo_td.appendChild(span);
                     span.classList.add('label');
-                    span.textContent = 'Private';
+                    span.textContent = repo_label;
                 }
 
                 const workflow_td = document.createElement('td');
