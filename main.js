@@ -393,7 +393,7 @@ const Controller = function(connections_limit, token=null) {
                 repo_td.appendChild(repo_anchor);
                 let repo_label = null;
                 if (repo.private && repo.archived) {
-                    repo_label = 'Private archived';
+                    repo_label = `Private${NBSP_CHAR}archived`;
                 } else if (repo.private) {
                     repo_label = 'Private';
                 } else if (repo.archived) {
