@@ -203,29 +203,6 @@ const ApiAgent = function(auth=null, connections_limit=1) {
     };
 };
 
-// Returns the index in the table for inserting a new row, such that alphabetic ordering
-// is maintained.
-const get_idx = function(tbody, repo, workflow) {
-    const key = repo.toLowerCase() + ' ' + workflow.toLowerCase();
-    let lo = 0;
-    let hi = tbody.children.length;
-    let idx = 0;
-    while (hi > lo) {
-        let mid = lo + ((hi - lo) >> 1);
-        let _repo = tbody.children[mid].getAttribute('data-repo').toLowerCase();
-        let _workflow = tbody.children[mid].getAttribute('data-workflow').toLowerCase();
-        let _key = _repo + ' ' + _workflow;
-        if (_key < key) {
-            idx = lo = mid + 1;
-        } else if (_key > key) {
-            idx = hi = mid;
-        } else {
-            idx = lo = mid + 1;
-        }
-    }
-    return idx;
-};
-
 // *************************************************
 // * Main
 // *************************************************
@@ -363,6 +340,29 @@ const Controller = function(connections_limit, token=null) {
         const tbody = document.createElement('tbody');
         table.appendChild(tbody);
         return results;
+    };
+
+    // Returns the index in the table for inserting a new row, such that alphabetic ordering
+    // is maintained.
+    const get_idx = (tbody, repo, workflow) => {
+        const key = repo.toLowerCase() + ' ' + workflow.toLowerCase();
+        let lo = 0;
+        let hi = tbody.children.length;
+        let idx = 0;
+        while (hi > lo) {
+            let mid = lo + ((hi - lo) >> 1);
+            let _repo = tbody.children[mid].getAttribute('data-repo').toLowerCase();
+            let _workflow = tbody.children[mid].getAttribute('data-workflow').toLowerCase();
+            let _key = _repo + ' ' + _workflow;
+            if (_key < key) {
+                idx = lo = mid + 1;
+            } else if (_key > key) {
+                idx = hi = mid;
+            } else {
+                idx = lo = mid + 1;
+            }
+        }
+        return idx;
     };
 
     const run = (user=null, _public=true) => {
