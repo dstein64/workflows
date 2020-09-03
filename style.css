@@ -54,8 +54,15 @@ a.tooltip span {
     padding: 0;
 }
 
-#options_form tbody > tr > td:nth-child(2) * {
+#options_form tbody > tr > td:nth-child(2) input,
+#options_form tbody > tr > td:nth-child(2) select * {
     font-family: monospace;
+}
+
+#options_form input[type=checkbox] {
+    vertical-align: middle;
+    position: relative;
+    bottom: 1px;
 }
 
 /* *************************************************

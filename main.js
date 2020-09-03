@@ -12,6 +12,20 @@ window.addEventListener('scroll', function() {
     forkme.style.top = `-${offset}px`;
 });
 
+const set_token_visibility = function() {
+    let type = 'password';
+    if (document.getElementById('show').checked)
+        type = 'text';
+    document.getElementById('token').type = type;
+};
+
+// Initialize token visibility
+set_token_visibility();
+
+document.getElementById('show').addEventListener('change', function(e) {
+    set_token_visibility();
+});
+
 const show_progress = function() {
     document.getElementById('progress').style.display = 'inline';
 };
