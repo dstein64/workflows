@@ -220,6 +220,11 @@ const REPOS_PRIORITY = 1;
 const EM_DASH_CHAR = '\u2014';
 const NBSP_CHAR = '\u00a0';
 
+const RUN_TYPE = {
+    DEFAULT: 0,
+    LATEST: 1
+};
+
 const Controller = function(connections_limit, token=null) {
     let auth = null;
     if (token !== null)
@@ -362,7 +367,7 @@ const Controller = function(connections_limit, token=null) {
         return idx;
     };
 
-    const run = (user=null, _public=true) => {
+    const process = (user=null, run_type=RUN_TYPE.DEFAULT, _public=true) => {
         // New DOM elements are created to populate #results. This prevents prior submissions
         // from clobbering a new submission. This was done as a precaution, as the deactivation
         // of the API agent in this.deactivate should be sufficient to prevent this from happening.
@@ -462,13 +467,24 @@ const Controller = function(connections_limit, token=null) {
                         conclusion_td.textContent = EM_DASH_CHAR;
                     }
                 };
-                process_run(repo.full_name, workflow.id, repo.default_branch, run_callback);
+                let branch = null;
+                switch (run_type) {
+                    case RUN_TYPE.DEFAULT:
+                        branch = repo.default_branch;
+                        break;
+                    case RUN_TYPE.LATEST:
+                        branch = null;
+                        break;
+                    default:
+                        throw `unknown run_type: ${run_type}`;
+                }
+                process_run(repo.full_name, workflow.id, branch, run_callback);
             };
             process_workflows(repo.full_name, workflow_callback);
         });
     };
 
-    this.run = (user=null) => {
+    this.process = (user=null, run_type=RUN_TYPE.DEFAULT) => {
         // Remove existing results
         const results = document.getElementById('results');
         while (results.lastChild) {
@@ -476,10 +492,10 @@ const Controller = function(connections_limit, token=null) {
         }
         if (user === null) {
             process_authenticated_user((user) => {
-                run(user.login, false);
+                process(user.login, run_type, false);
             });
         } else {
-            run(user, true);
+            process(user, run_type, true);
         }
     };
 
@@ -507,8 +523,9 @@ const Controller = function(connections_limit, token=null) {
             alert('A token or a user is required.');
             return false;
         }
+        const run_type = RUN_TYPE[document.getElementById('run_type').value.toUpperCase()];
         controller = new Controller(connections_limit, token);
-        controller.run(user);
+        controller.process(user, run_type);
         return false;
     };
 
