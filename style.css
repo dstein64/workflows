@@ -54,7 +54,7 @@ a.tooltip span {
     padding: 0;
 }
 
-#options_form input {
+#options_form tbody > tr > td:nth-child(2) * {
     font-family: monospace;
 }
 
