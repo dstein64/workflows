@@ -220,11 +220,6 @@ const REPOS_PRIORITY = 1;
 const EM_DASH_CHAR = '\u2014';
 const NBSP_CHAR = '\u00a0';
 
-const RUN_TYPE = {
-    DEFAULT: 0,
-    LATEST: 1
-};
-
 const Controller = function(connections_limit, token=null) {
     let auth = null;
     if (token !== null)
@@ -367,7 +362,7 @@ const Controller = function(connections_limit, token=null) {
         return idx;
     };
 
-    const process = (user=null, run_type=RUN_TYPE.DEFAULT, _public=true) => {
+    const process = (user=null, default_branch=true, _public=true) => {
         // New DOM elements are created to populate #results. This prevents prior submissions
         // from clobbering a new submission. This was done as a precaution, as the deactivation
         // of the API agent in this.deactivate should be sufficient to prevent this from happening.
@@ -468,31 +463,23 @@ const Controller = function(connections_limit, token=null) {
                     }
                 };
                 let branch = null;
-                switch (run_type) {
-                    case RUN_TYPE.DEFAULT:
-                        branch = repo.default_branch;
-                        break;
-                    case RUN_TYPE.LATEST:
-                        branch = null;
-                        break;
-                    default:
-                        throw `unknown run_type: ${run_type}`;
-                }
+                if (default_branch)
+                    branch = repo.default_branch;
                 process_run(repo.full_name, workflow.id, branch, run_callback);
             };
             process_workflows(repo.full_name, workflow_callback);
         });
     };
 
-    this.process = (user=null, run_type=RUN_TYPE.DEFAULT) => {
+    this.process = (user=null, default_branch=true) => {
         if (document.getElementById('results').firstChild !== null)
             throw '#results should be empty';
         if (user === null) {
             process_authenticated_user((user) => {
-                process(user.login, run_type, false);
+                process(user.login, default_branch, false);
             });
         } else {
-            process(user, run_type, true);
+            process(user, default_branch, true);
         }
     };
 
@@ -529,9 +516,9 @@ const Controller = function(connections_limit, token=null) {
             alert('A token or a user is required.');
             return false;
         }
-        const run_type = RUN_TYPE[document.getElementById('run_type').value.toUpperCase()];
+        const default_branch = document.getElementById('default_branch').checked;
         controller = new Controller(connections_limit, token);
-        controller.process(user, run_type);
+        controller.process(user, default_branch);
         return false;
     };
 

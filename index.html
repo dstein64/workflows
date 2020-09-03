@@ -50,19 +50,15 @@
                 <tr>
                     <td>
                         <a class="tooltip">
-                            run
+                            default<br>branch
                             <span>
-                                <em>default</em> shows information for the most recent workflow run on
-                                the default branch. <em>latest</em> shows information for the latest
-                                workflow run on any branch.
+                                Shows information for the latest workflow run on the default branch.
+                                Otherwise, information is shown for the latest workflow run on any branch.
                             </span>
                         </a>
                     </td>
                     <td>
-                        <select id="run_type">
-                            <option selected="selected">default</option>
-                            <option>latest</option>
-                        </select>
+                        <input id="default_branch" type="checkbox" checked>
                     </td>
                 </tr>
             </tbody>
