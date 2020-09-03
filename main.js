@@ -485,11 +485,8 @@ const Controller = function(connections_limit, token=null) {
     };
 
     this.process = (user=null, run_type=RUN_TYPE.DEFAULT) => {
-        // Remove existing results
-        const results = document.getElementById('results');
-        while (results.lastChild) {
-            results.removeChild(results.lastChild);
-        }
+        if (document.getElementById('results').firstChild !== null)
+            throw '#results should be empty';
         if (user === null) {
             process_authenticated_user((user) => {
                 process(user.login, run_type, false);
@@ -509,7 +506,16 @@ const Controller = function(connections_limit, token=null) {
 {
     let controller = null;
 
-    document.getElementById('submit_button').onclick = function() {
+    document.getElementById('submit_button').onclick = function(event) {
+        // This prevents the default form submission behavior, added here particularly to
+        // prevent form submission when an exception is thrown.
+        event.preventDefault();
+        event.stopPropagation();
+        // Remove existing results
+        const results = document.getElementById('results');
+        while (results.lastChild) {
+            results.removeChild(results.lastChild);
+        }
         if (controller !== null)
             controller.deactivate();
         let token = document.getElementById('token').value;
