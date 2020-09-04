@@ -118,8 +118,45 @@ const PriorityQueue = function() {
 //   > 403: You have triggered an abuse detection mechanism.
 //     Please wait a few minutes before you try again.
 //   > Chrome: net::ERR_INSUFFICIENT_RESOURCES
+
+//  Observed error responses
+// --------------------------
+// 401 observed example
+//   {
+//      "message": "Bad credentials",
+//      "documentation_url": "https://docs.github.com/rest"
+//   }
+// 401 observed example
+//   {
+//      "message": "Requires authentication",
+//      "documentation_url":
+//        "https://docs.github.com/rest/reference/users#get-the-authenticated-user"
+//   }
+// 403 observed example
+//   {
+//      "message": "API rate limit exceeded for 67.163.151.50. (But here's the good
+//         news: Authenticated requests get a higher rate limit. Check out the documentation
+//         for more details.)",
+//      "documentation_url": "https://developer.github.com/v3/#rate-limiting"
+//   }
+// 403 observed example
+//   {
+//      "message": "You have triggered an abuse detection mechanism. Please wait a few
+//         minutes before you try again.",
+//      "documentation_url": "https://developer.github.com/v3/#abuse-rate-limits"
+//   }
+// 404 observed example
+//   {
+//      "message": "Not Found",
+//      "documentation_url":
+//        "https://docs.github.com/rest/reference/repos#list-repositories-for-a-user"
+//   }
+
 const ApiAgent = function(auth=null, connections_limit=1) {
     const API = 'https://api.github.com';
+    // Responses with these codes are assumed to return a JSON object with a 'message'
+    // and 'documentation_url' (see examples above).
+    const ERROR_CODES = [401, 403, 404];
 
     let num_connections = 0;
     const pending = new PriorityQueue();
@@ -147,37 +184,7 @@ const ApiAgent = function(auth=null, connections_limit=1) {
                     deactivate();
                     console.error(this.status + '\n' + this.responseText);
                     let message = `${this.status} Error`;
-                    if ([401, 403, 404].includes(this.status)) {
-                        // 401 observed example
-                        //   {
-                        //      "message": "Bad credentials",
-                        //      "documentation_url": "https://docs.github.com/rest"
-                        //   }
-                        // 401 observed example
-                        //   {
-                        //      "message": "Requires authentication",
-                        //      "documentation_url":
-                        //        "https://docs.github.com/rest/reference/users#get-the-authenticated-user"
-                        //   }
-                        // 403 observed example
-                        //   {
-                        //      "message": "API rate limit exceeded for 67.163.151.50. (But here's the good
-                        //         news: Authenticated requests get a higher rate limit. Check out the documentation
-                        //         for more details.)",
-                        //      "documentation_url": "https://developer.github.com/v3/#rate-limiting"
-                        //   }
-                        // 403 observed example
-                        //   {
-                        //      "message": "You have triggered an abuse detection mechanism. Please wait a few
-                        //         minutes before you try again.",
-                        //      "documentation_url": "https://developer.github.com/v3/#abuse-rate-limits"
-                        //   }
-                        // 404 observed example
-                        //   {
-                        //      "message": "Not Found",
-                        //      "documentation_url":
-                        //        "https://docs.github.com/rest/reference/repos#list-repositories-for-a-user"
-                        //   }
+                    if (ERROR_CODES.includes(this.status)) {
                         try {
                             const response = JSON.parse(this.responseText);
                             message += '\n\nHere\'s more information from GitHub:\n';
