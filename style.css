@@ -78,6 +78,19 @@ a.tooltip span {
     height: 149px;
 }
 
+details > *:not(summary){
+    margin-left: 32px;
+}
+
+summary {
+    outline: none;
+}
+
+.summary {
+    cursor: pointer;
+    border-bottom: 1px dotted;
+}
+
 /* *************************************************
  * * Progress and Results
  * ************************************************* */

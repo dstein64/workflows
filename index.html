@@ -11,6 +11,28 @@
 </a>
 <progress id="progress"></progress>
 <h1>workflows</h1>
+<details>
+    <summary><span class="summary">Instructions</span></summary>
+    <p>
+        To view workflows for a user's public repositories, enter the corresponding <em>user</em>.
+    </p>
+    <p>
+        To view workflows for your public and private repositories, leave the <em>user</em> field
+        blank, and enter an account <em>token</em> that has scope for accessing private repos.
+    </p>
+    <p>
+        When a token is specified, authenticated requests are made to GitHub's API, which
+        permits a higher <a href="https://developer.github.com/v3/#rate-limiting">rate limit</a>.
+    </p>
+    <p>
+        See GitHub's <a
+            href="https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token">
+        documentation</a> for instructions on generating a token. No scopes are necessary to view
+        workflows for public repositories. <em>repo</em> scope is necessary to view workflows for
+        your private repositories.
+    </p>
+</details>
+<br>
 <form id="options_form">
     <fieldset id="fieldset">
         <table id="options_table">
