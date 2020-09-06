@@ -12,24 +12,6 @@ window.addEventListener('scroll', function() {
     forkme.style.top = `-${offset}px`;
 });
 
-// Properly position progress bar on mobile devices, accounting for visual viewport
-// position relative to layout viewport position.
-if (window.visualViewport !== undefined) {
-    const progress = document.getElementById('progress');
-    const viewport = window.visualViewport;
-    const handler = function() {
-        const left = viewport.offsetLeft;
-        const top = viewport.height - window.innerHeight  + viewport.offsetTop;
-        progress.style.transform = `translate(${left}px, ${top}px)`;
-        progress.style.width = `${viewport.width}px`;
-    };
-    viewport.addEventListener('scroll', handler);
-    viewport.addEventListener('resize', handler);
-    window.addEventListener('scroll', handler);
-    window.addEventListener('resize', handler);
-    handler();
-}
-
 const set_token_visibility = function() {
     let type = 'password';
     if (document.getElementById('show').checked)
