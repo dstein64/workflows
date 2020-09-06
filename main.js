@@ -25,6 +25,8 @@ if (window.visualViewport !== undefined) {
     };
     viewport.addEventListener('scroll', handler);
     viewport.addEventListener('resize', handler);
+    window.addEventListener('scroll', handler);
+    window.addEventListener('resize', handler);
     handler();
 }
 
