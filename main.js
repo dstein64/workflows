@@ -350,7 +350,7 @@ const Controller = function(connections_limit, token=null) {
         const tr = document.createElement('tr');
         thead.appendChild(tr);
         const columns = ['', 'repository', 'workflow', 'badge', 'run', 'status', 'conclusion'];
-        for (column of columns) {
+        for (const column of columns) {
             const th = document.createElement('th');
             th.textContent = column;
             tr.appendChild(th);
