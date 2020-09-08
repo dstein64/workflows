@@ -514,9 +514,7 @@ const Controller = function(connections_limit, token=null) {
 {
     let controller = null;
 
-    document.getElementById('submit_button').onclick = function(event) {
-        // This prevents the default form submission behavior, added here particularly to
-        // prevent form submission when an exception is thrown.
+    document.getElementById('options_form').addEventListener('submit', function(event) {
         event.preventDefault();
         event.stopPropagation();
         // Remove existing results
@@ -540,11 +538,12 @@ const Controller = function(connections_limit, token=null) {
         const default_branch = document.getElementById('default_branch').checked;
         controller = new Controller(connections_limit, token);
         controller.process(user, default_branch);
-    };
+    });
 
-    document.getElementById('cancel_button').onclick = function() {
+    document.getElementById('cancel_button').addEventListener('click', function(event) {
+        event.preventDefault();
+        event.stopPropagation();
         if (controller !== null)
             controller.deactivate();
-        return false;
-    };
+    });
 }
