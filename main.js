@@ -27,11 +27,11 @@ document.getElementById('show').addEventListener('change', function(e) {
 });
 
 const show_progress = function() {
-    document.getElementById('progress').style.display = 'inline';
+    document.getElementById('progress').style.visibility = 'visible';
 };
 
 const hide_progress = function() {
-    document.getElementById('progress').style.display = 'none';
+    document.getElementById('progress').style.visibility = 'hidden';
 };
 
 // *************************************************
