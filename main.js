@@ -349,7 +349,7 @@ const Controller = function(connections_limit, token=null) {
         table.appendChild(thead);
         const tr = document.createElement('tr');
         thead.appendChild(tr);
-        const columns = ['', 'repository', 'workflow', 'badge', 'run', 'status', 'conclusion'];
+        const columns = ['', 'repository', 'workflow', 'badge', 'state', 'run', 'status', 'conclusion'];
         for (const column of columns) {
             const th = document.createElement('th');
             th.textContent = column;
@@ -445,6 +445,18 @@ const Controller = function(connections_limit, token=null) {
                 badge_img.src = workflow.badge_url + '?_=' + String(new Date().getTime());
                 badge_td.appendChild(badge_img);
 
+                const state_td = document.createElement('td');
+                tr.appendChild(state_td);
+                if (workflow.state !== null) {
+                    // Observed states: 'active', 'disabled_manually', 'disabled_inactivity'
+                    const state_span = document.createElement('span');
+                    state_span.dataset.state = workflow.state;
+                    state_span.textContent = workflow.state;
+                    state_td.appendChild(state_span);
+                } else {
+                    state_td.textContent = EM_DASH_CHAR;
+                }
+
                 const run_callback = (run) => {
                     const run_td = document.createElement('td');
                     tr.appendChild(run_td);
@@ -462,7 +474,7 @@ const Controller = function(connections_limit, token=null) {
                     if (run !== null && run.status !== null) {
                         // Observed statuses: 'queued', 'in_progress', 'completed'
                         const status_span = document.createElement('span');
-                        status_span.classList.add(run.status);
+                        status_span.dataset.status = run.status;
                         status_span.textContent = run.status;
                         status_td.appendChild(status_span);
                     } else {
@@ -476,7 +488,7 @@ const Controller = function(connections_limit, token=null) {
                         // 'canceled' was paired with 'completed' status.
                         // null was paired with 'queued' and 'in_progress' statuses.
                         const conclusion_span = document.createElement('span');
-                        conclusion_span.classList.add(run.conclusion);
+                        conclusion_span.dataset.conclusion = run.conclusion;
                         conclusion_span.textContent = run.conclusion;
                         conclusion_td.appendChild(conclusion_span);
                     } else {

@@ -150,25 +150,28 @@ summary {
 }
 
 /*
+ * Observed states: 'active', 'disabled_manually', 'disabled_inactivity'
  * Observed statuses: 'queued', 'in_progress', 'completed'
  * Observed conclusions: 'success', 'failure', 'cancelled', null
  *
- * 'completed' and 'success' are not colored. Nor is null since it's shown with a dash.
+ * state=active, status=completed, conclusion=success, conclusion=null are not colored.
  */
 
-#results table .queued {
+#results table [data-status='queued'] {
     color: violet;
 }
 
-#results table .in_progress {
+#results table [data-status='in_progress'] {
     color: purple;
 }
 
-#results table .failure {
+#results table [data-conclusion='failure'],
+#results table [data-state='disabled_inactivity'] {
     color: red;
     font-weight: bold;
 }
 
-#results table .cancelled {
+#results table [data-conclusion='cancelled'],
+#results table [data-state='disabled_manually'] {
     color: orange;
 }
