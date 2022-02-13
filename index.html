@@ -14,23 +14,23 @@
     <summary><span class="summary">Instructions</span></summary>
     <p>
         To view workflows for a user's public repositories, enter the corresponding <em>user</em>.
+        No scopes are necessary if using a token.
     </p>
     <p>
         To view workflows for public and private repositories 1) you own, 2) where you're a
         collaborator, or 3) you can access through an organization membership, leave the
-        <em>user</em> field blank, and enter an account <em>token</em> that has the necessary
-        scope (e.g., <em>repo</em> scope).
+        <em>user</em> field blank, and enter an account <em>token</em> that has <em>repo</em>
+        scope.
     </p>
     <p>
-        When a token is specified, authenticated requests are made to GitHub's API, which
-        permits a higher <a href="https://developer.github.com/v3/#rate-limiting">rate limit</a>.
+        When a token is specified&mdash;either with or without a <em>user</em> entered&mdash;authenticated
+        requests are made to GitHub's API, which permits a higher
+        <a href="https://developer.github.com/v3/#rate-limiting">rate limit</a>.
     </p>
     <p>
         See GitHub's <a
             href="https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token">
-        documentation</a> for instructions on generating a token. No scopes are necessary to view
-        workflows for public repositories. <em>repo</em> scope is necessary to view workflows for
-        your private repositories.
+        documentation</a> for instructions on generating a token.
     </p>
 </details>
 <br>
