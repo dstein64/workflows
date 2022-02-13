@@ -443,6 +443,20 @@ const Controller = function(connections_limit, token=null) {
                 const badge_img = document.createElement('img');
                 // Add a query string param to prevent showing a cached image.
                 badge_img.src = workflow.badge_url + '?_=' + String(new Date().getTime());
+                // Replace the image with a link if there is an error loading.
+                badge_img.onerror = () => {
+                    badge_img.onerror = null;
+                    badge_td.removeChild(badge_img);
+                    const badge_anchor = document.createElement('a');
+                    badge_anchor.href = workflow.badge_url;
+                    let badge_name = workflow.badge_url;
+                    const idx = badge_name.lastIndexOf('/');
+                    if (idx > -1)
+                        badge_name = badge_name.substring(idx + 1);
+                    badge_anchor.textContent = badge_name;
+                    badge_anchor.title = workflow.badge_url;
+                    badge_td.appendChild(badge_anchor);
+                };
                 badge_td.appendChild(badge_img);
 
                 const state_td = document.createElement('td');
