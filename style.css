@@ -91,6 +91,15 @@ summary {
     border-bottom: 1px dotted;
 }
 
+.info {
+    cursor: pointer;
+    color: #8e96a0;
+}
+
+.info:hover {
+    color: black;
+}
+
 /* *************************************************
  * * Progress and Results
  * ************************************************* */
@@ -174,4 +183,36 @@ summary {
 #results table [data-conclusion='cancelled'],
 #results table [data-state='disabled_manually'] {
     color: orange;
+}
+
+/* *************************************************
+ * * Dialog
+ * ************************************************* */
+
+dialog {
+    max-width: 75vw;
+    max-height: 50vh;
+    padding: 0;
+}
+
+#dialog-wrapper {
+    margin: 16px 32px;
+    padding: 0;
+}
+
+.close {
+    padding: 7px;
+    margin: -1px;
+    font-weight: bold;
+    line-height: .6;
+    position: fixed;
+    cursor: pointer;
+    font-size: 32px;
+    color: #8e96a0;
+    z-index: 2147483647;
+    float: left;
+}
+
+.close:hover {
+    color: black;
 }

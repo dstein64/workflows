@@ -240,6 +240,8 @@ const REPOS_PRIORITY = 1;
 
 const EM_DASH_CHAR = '\u2014';
 const NBSP_CHAR = '\u00a0';
+const INFO_CHAR = '\u{1F6C8}';
+const MULTIPLY_CHAR = '\u00d7';
 
 const Controller = function(connections_limit, token=null) {
     let auth = null;
@@ -383,6 +385,32 @@ const Controller = function(connections_limit, token=null) {
         return idx;
     };
 
+    const create_dialog = (content) => {
+        const dialog = document.createElement('dialog');
+        const dialog_close = document.createElement('span');
+        dialog_close.textContent = MULTIPLY_CHAR;
+        dialog_close.classList.add('close');
+        dialog_close.addEventListener('click', () => {
+            dialog.close();
+        });
+        dialog.appendChild(dialog_close);
+        dialog.addEventListener('click', (e) => {
+            const rect = dialog.getBoundingClientRect();
+            const overlap =
+                rect.top <= e.clientY
+                    && rect.top + rect.height >= e.clientY
+                    && rect.left <= e.clientX
+                    && rect.left + rect.width >= e.clientX;
+            if (!overlap)
+                dialog.close();
+        });
+        const wrapper = document.createElement('div');
+        wrapper.id = 'dialog-wrapper';
+        wrapper.appendChild(content);
+        dialog.appendChild(wrapper);
+        return dialog;
+    };
+
     const process = (user=null, default_branch=true, _public=true) => {
         // New DOM elements are created to populate #results. This prevents prior submissions
         // from clobbering a new submission. This was done as a precaution, as the deactivation
@@ -436,6 +464,28 @@ const Controller = function(connections_limit, token=null) {
                 workflow_anchor.href = `https://github.com/${repo.full_name}/actions?` + workflow_qs;
                 workflow_anchor.textContent = workflow.name;
                 workflow_td.appendChild(workflow_anchor);
+                workflow_td.appendChild(document.createTextNode(NBSP_CHAR));
+                const workflow_info_div = document.createElement('div');
+                const workflow_info_h4 = document.createElement('h4');
+                workflow_info_h4.textContent = `workflow info`;
+                workflow_info_h4.appendChild(document.createElement('br'));
+                workflow_info_h4.appendChild(document.createElement('br'));
+                workflow_info_h4.appendChild(document.createTextNode(`repository: ${name}`));
+                workflow_info_h4.appendChild(document.createElement('br'));
+                workflow_info_h4.appendChild(document.createTextNode(`workflow: ${workflow.name}`));
+                const workflow_info_pre = document.createElement('pre');
+                workflow_info_pre.textContent = JSON.stringify(workflow, null, 2);
+                workflow_info_div.appendChild(workflow_info_h4);
+                workflow_info_div.appendChild(workflow_info_pre);
+                const workflow_info_dialog = create_dialog(workflow_info_div);
+                workflow_td.appendChild(workflow_info_dialog);
+                const workflow_info_span = document.createElement('span');
+                workflow_info_span.classList.add('info');
+                workflow_info_span.textContent = INFO_CHAR;
+                workflow_info_span.addEventListener('click', (event) => {
+                    workflow_info_dialog.showModal();
+                });
+                workflow_td.appendChild(workflow_info_span);
 
                 const badge_td = document.createElement('td');
                 badge_td.classList.add('badge');
@@ -479,6 +529,30 @@ const Controller = function(connections_limit, token=null) {
                         run_anchor.href = run.html_url;
                         run_anchor.textContent = run.id;
                         run_td.appendChild(run_anchor);
+                        run_td.appendChild(document.createTextNode(NBSP_CHAR));
+                        const run_info_div = document.createElement('div');
+                        const run_info_h4 = document.createElement('h4');
+                        run_info_h4.textContent = `run info`;
+                        run_info_h4.appendChild(document.createElement('br'));
+                        run_info_h4.appendChild(document.createElement('br'));
+                        run_info_h4.appendChild(document.createTextNode(`repository: ${name}`));
+                        run_info_h4.appendChild(document.createElement('br'));
+                        run_info_h4.appendChild(document.createTextNode(`workflow: ${workflow.name}`));
+                        run_info_h4.appendChild(document.createElement('br'));
+                        run_info_h4.appendChild(document.createTextNode(`run: ${run.id}`));
+                        const run_info_pre = document.createElement('pre');
+                        run_info_pre.textContent = JSON.stringify(run, null, 2);
+                        run_info_div.appendChild(run_info_h4);
+                        run_info_div.appendChild(run_info_pre);
+                        const run_info_dialog = create_dialog(run_info_div);
+                        run_td.appendChild(run_info_dialog);
+                        const run_info_span = document.createElement('span');
+                        run_info_span.classList.add('info');
+                        run_info_span.textContent = INFO_CHAR;
+                        run_info_span.addEventListener('click', (event) => {
+                            run_info_dialog.showModal();
+                        });
+                        run_td.appendChild(run_info_span);
                     } else {
                         run_td.textContent = EM_DASH_CHAR;
                     }
