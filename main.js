@@ -408,33 +408,6 @@ const Controller = function(connections_limit, token=null) {
         wrapper.id = 'dialog-wrapper';
         wrapper.appendChild(content);
         dialog.appendChild(wrapper);
-        const showModal = dialog.showModal;
-        dialog.showModal = () => {
-            // On mobile, account for viewport scaling on 1) pages that aren't mobile-friendly
-            // (e.g., pages without a <meta name="viewport" ...> tag, or 2) pages that are zoomed.
-            if (window.visualViewport !== undefined) {
-                const viewportWidth = window.visualViewport.width;
-                const viewportHeight = window.visualViewport.height;
-                const viewportScale = window.visualViewport.scale;
-                const viewportOffsetLeft = window.visualViewport.offsetLeft;
-                const viewportOffsetTop = window.visualViewport.offsetTop;
-                // Don't use this approach unless necessary. The default approach is preferable
-                // since it automatically scales for changing window sizes.
-                if (viewportScale !== 1 || viewportOffsetLeft !== 0 || viewportOffsetTop !== 0) {
-                    let transform = 'translateX(' + viewportOffsetLeft + 'px)';
-                    transform += ' translateY(' + viewportOffsetTop + 'px)';
-                    transform += ' scale(' + (1 / viewportScale) + ')';
-                    dialog.style.setProperty(
-                        'width', viewportWidth * viewportScale + 'px', 'important');
-                    dialog.style.setProperty(
-                        'height', viewportHeight * viewportScale + 'px', 'important');
-                    dialog.style.setProperty('transform-origin', 'top left', 'important');
-                    dialog.style.setProperty('transform', transform, 'important');
-                    dialog.style.setProperty('position', 'absolute', 'important');
-                }
-            }
-            showModal.apply(dialog);
-        };
         return dialog;
     };
 
