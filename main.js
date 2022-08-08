@@ -240,7 +240,7 @@ const REPOS_PRIORITY = 1;
 
 const EM_DASH_CHAR = '\u2014';
 const NBSP_CHAR = '\u00a0';
-const INFO_CHAR = '\u{1F6C8}';
+const INFO_CHAR = '\u24d8';
 const MULTIPLY_CHAR = '\u00d7';
 
 const Controller = function(connections_limit, token=null) {

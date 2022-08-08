@@ -94,6 +94,8 @@ summary {
 .info {
     cursor: pointer;
     color: #8e96a0;
+    font-weight: bold;
+    font-size: 14px;
 }
 
 .info:hover {
