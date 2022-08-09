@@ -411,7 +411,6 @@ const Controller = function(connections_limit, token=null) {
         const showModal = dialog.showModal;
         dialog.showModal = () => {
             dialog.removeAttribute('style');
-            dialog_close.removeAttribute('style');
             // On mobile, account for viewport scaling on 1) pages that aren't mobile-friendly
             // (e.g., pages without a <meta name="viewport" ...> tag, or 2) pages that are zoomed.
             if (window.visualViewport !== undefined) {
@@ -420,24 +419,26 @@ const Controller = function(connections_limit, token=null) {
                 const viewport_scale = window.visualViewport.scale;
                 const viewport_offset_left = window.visualViewport.offsetLeft;
                 const viewport_offset_top = window.visualViewport.offsetTop;
+                const viewport_page_left = window.visualViewport.pageLeft;
+                const viewport_page_top = window.visualViewport.pageTop;
                 // Don't use this approach unless necessary. The default approach is preferable
                 // since 1) it automatically scales for changing window sizes, and 2) uses width
-                // and height less than 75% when the content can fit.
+                // and height less than portion (e.g., 75%) when the content can fit.
                 if (viewport_scale !== 1 || viewport_offset_left !== 0 || viewport_offset_top !== 0) {
-                    const portion = 0.75;
-                    const width = viewport_width * portion;
-                    const height = viewport_height * portion;
+                    const portion_width = 0.85;
+                    const portion_height = 0.85;
+                    const width = viewport_width * portion_width;
+                    const height = viewport_height * portion_height;
                     dialog.style.setProperty('width', width + 'px', 'important');
                     dialog.style.setProperty('height', height + 'px', 'important');
                     dialog.style.setProperty('margin', '0', 'important');
                     dialog.style.setProperty('position', 'absolute', 'important');
-                    const top = window.visualViewport.pageTop + (viewport_height * (1 - portion) / 2);
-                    const left = window.visualViewport.pageLeft + (viewport_width * (1 - portion) / 2);
-                    dialog.style.setProperty('top', top + 'px', 'important');
+                    const left = viewport_page_left + (viewport_width * (1 - portion_width) / 2);
+                    const top = viewport_page_top + (viewport_height * (1 - portion_height) / 2);
                     dialog.style.setProperty('left', left + 'px', 'important');
+                    dialog.style.setProperty('top', top + 'px', 'important');
                     dialog.style.setProperty('max-width', '100vw', 'important');
                     dialog.style.setProperty('max-height', '100vh', 'important');
-                    dialog_close.style.setProperty('position', 'absolute', 'important');
                 }
             }
             showModal.apply(dialog);

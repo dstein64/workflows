@@ -195,11 +195,16 @@ dialog {
     max-width: 75vw;
     max-height: 75vh;
     padding: 0;
+    height: 100%;
+    overflow: hidden;
 }
 
 #dialog-wrapper {
-    margin: 16px 32px;
-    padding: 0;
+    margin: 0;
+    overflow: auto;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 16px 32px;
 }
 
 .close {
@@ -207,12 +212,11 @@ dialog {
     margin: -1px;
     font-weight: bold;
     line-height: .6;
-    position: fixed;
+    position: absolute;
     cursor: pointer;
     font-size: 32px;
     color: #8e96a0;
     z-index: 2147483647;
-    float: left;
 }
 
 .close:hover {
