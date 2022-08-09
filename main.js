@@ -411,6 +411,7 @@ const Controller = function(connections_limit, token=null) {
         const showModal = dialog.showModal;
         dialog.showModal = () => {
             dialog.removeAttribute('style');
+            dialog_close.removeAttribute('style');
             // On mobile, account for viewport scaling on 1) pages that aren't mobile-friendly
             // (e.g., pages without a <meta name="viewport" ...> tag, or 2) pages that are zoomed.
             if (window.visualViewport !== undefined) {
