@@ -192,18 +192,12 @@ summary {
  * ************************************************* */
 
 dialog {
-    max-width: 75vw;
-    max-height: 75vh;
+    max-width: 75%;
+    max-height: 75%;
     padding: 0;
-    height: 100%;
-    overflow: hidden;
 }
 
 #dialog-wrapper {
-    margin: 0;
-    overflow: auto;
-    height: 100%;
-    box-sizing: border-box;
     padding: 16px 32px;
 }
 
@@ -212,7 +206,7 @@ dialog {
     margin: -1px;
     font-weight: bold;
     line-height: .6;
-    position: absolute;
+    position: fixed;
     cursor: pointer;
     font-size: 32px;
     color: #8e96a0;
