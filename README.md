@@ -5,7 +5,7 @@ statuses across a user's repositories.
 
 *workflows* is available at https://dstein64.github.io/workflows/.
 
-![screenshot](screenshot.png)
+<img src="https://github.com/dstein64/media/blob/main/workflows/screenshot.png?raw=true" width="633" />
 
 License
 -------
