@@ -134,9 +134,9 @@ const PriorityQueue = function() {
 //   }
 // 403 observed example
 //   {
-//      "message": "API rate limit exceeded for 67.163.151.50. (But here's the good
-//         news: Authenticated requests get a higher rate limit. Check out the documentation
-//         for more details.)",
+//      "message": "API rate limit exceeded for <IP_ADDRESS>. (But here's the good news:
+//      Authenticated requests get a higher rate limit. Check out the documentation for more
+//      details.)",
 //      "documentation_url": "https://developer.github.com/v3/#rate-limiting"
 //   }
 // 403 observed example
