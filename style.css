@@ -96,6 +96,7 @@ summary {
     color: #8e96a0;
     font-weight: bold;
     font-size: 14px;
+    font-family: monospace;
 }
 
 .info:hover {
