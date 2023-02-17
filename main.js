@@ -459,9 +459,8 @@ const Controller = function(connections_limit, token=null) {
                 const workflow_td = document.createElement('td');
                 tr.appendChild(workflow_td);
                 const workflow_anchor = document.createElement('a');
-                const workflow_qs = new URLSearchParams(
-                    {'query': 'workflow:"' + workflow.name + '"'}).toString();
-                workflow_anchor.href = `https://github.com/${repo.full_name}/actions?` + workflow_qs;
+                workflow_anchor.href =
+                    `https://github.com/${repo.full_name}/actions/workflows/${workflow.name}.yml`;
                 workflow_anchor.textContent = workflow.name;
                 workflow_td.appendChild(workflow_anchor);
                 workflow_td.appendChild(document.createTextNode(NBSP_CHAR));
